@@ -11,16 +11,16 @@
 #include "starletcontrols/cameraController.hpp"
 
 struct Engine {
-	WindowManager windowManager;
+	std::string assetPath;
 
+	WindowManager windowManager;
 	Renderer renderer;
 	ShaderManager shaderManager;
 	MeshManager meshManager;
 	TextureManager textureManager;
-
-	InputManager inputManager;
 	SceneManager sceneManager;
 
+	InputManager inputManager;
 	ModelController modelController;
 	FreeCameraController cameraController;
 
@@ -34,8 +34,6 @@ struct Engine {
 	void run();
 
 private:
-	std::string assetPath;
-
 	bool setupShaders();
 	bool loadSceneMeshes();
 	bool loadSceneLighting();
