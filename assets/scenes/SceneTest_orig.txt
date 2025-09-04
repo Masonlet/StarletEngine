@@ -1,0 +1,28 @@
+comment, name, pos(xyz), rot(yaw pitch), fov, nearPlane farPlane, camSpeed
+camera, Cam1, 0.0 0.0 0.0, 0.0 0.0, 75.0, 0.1 10000, 50
+
+comment, name, meshPath, pos(xyz), rot(xyz), scale(xyz), colour(Int, Named Coloured, Random, Rainbow, PLY), specular(rgb, power)
+model, cow, cow_xyz_n_rgba.ply, 0.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, 255 255 0 160, 1.0 1.0 1.0 32.0
+model, cow2, cow_xyz_n_rgba.ply, 20.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, 255 255 0 160, 1.0 1.0 1.0 32.0
+model, cow3, cow_xyz_n_rgba.ply, 40.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, 255 255 0 160, 1.0 1.0 1.0 32.0
+model, cow4, cow_xyz_n_rgba.ply, 60.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, 255 255 0 160, 1.0 1.0 1.0 32.0
+model, dolphin, dolphin_xyz_n_rgba.ply, 0.0 -100.0 -50.0, 0.0 0.0 0.0, 1.0 1.0 1.0, PLY, 1.0 1.0 1.0 32.0
+model, homer, homer_xyz_n_rgba.ply, -30.0 0.0 -50.0, 0.0 0.0 0.0, 100.0 100.0 100.0, Random, 1.0 1.0 1.0 32.0
+model, ship, Corellian_Corvette_xyz_n_rgba.ply, 0.0 -20.0 10.0, 0.0 0.0 0.0, 10.0 10.0 10.0, Rainbow, 1.0 1.0 1.0 32.0
+model, testcar, de--lorean_xyz_n_rgba.ply, 0.0 0.0 -100.0, 45.0 0.0 0.0, 1.0 1.0 1.0, PLY, 1.0 1.0 1.0 32.0, 
+model, warehouse, Warehouse_xyz_n_rgba.ply, 0.0 -20.0 0.0, 0.0 0.0 0.0, 10.0 10.0 10.0, PLY, 1.0 1.0 1.0 32.0, 
+
+comment, name, type, pos (xyz), diffuse (rgba), atten (xyzw), direction, param1 (spotlight inner, spotight outer), param2 (on/off)
+light, sunlight, Directional, 0.0 0.0 0.0, 0.25 0.22 0.18 1.0, 0.0 0.01 0.005 0.0, -0.5 -1.0 -0.5 0.0, 0.0 0.0 0.0, 1.0 0.0 0.0 0.0
+light, whitePoint, Point, 0.0 100.0 100.0, 50.0 50.0 50.0 1.0, 0.0 0.01 0.005 0.0, 0.0 0.0 0.0 0.0, 0.0 0.0 0.0, 1.0 0.0 0.0 0.0
+light, bluePoint, Point, 0.0 100.0 -100.0, 0.0 0.0 50.0 1.0, 0.0 0.01 0.005 0.0, 0.0 0.0 0.0 0.0, 0.0 0.0 0.0, 1.0 0.0 0.0 0.0
+light, redSpot, Spot, 10.0 5.0 0.0, 100.0 0.0 0.0 1.0, 0.0 0.01 0.005 0.0, 0.0 0.0 -1.0 0.0, 15.0 25.0 0.0, 1.0 0.0 0.0 0.0
+
+comment, name, pos (xyz), rot (xyz), scale (xyz), colour
+comment, triangle, tri1, 0.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, Red
+
+comment amount offset, pos (xyz), rot (xyz), scale (xyz), colour
+comment, grid1, squareGrid 40000 1.0, 0.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, White
+
+comment amount offset, pos (xyz), rot (xyz), scale (xyz), colour
+comment, grid2, cubeGrid 100000 1.0, 0.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, White

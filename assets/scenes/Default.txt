@@ -1,0 +1,6 @@
+model, on, on, cow, cow_xyz_n_rgba.ply, 0.0 0.0 0.0, 0.0 0.0 0.0, 1.0 1.0 1.0, 255 255 0 255, 1.0 1.0 1.0 32.0
+model, on, on, dolphin, dolphin_xyz_n_rgba.ply, 0.0 -100.0 -50.0, 0.0 0.0 0.0, 1.0 1.0 1.0, PLY, 1.0 1.0 1.0 32.0
+model, on, on, homer, homer_xyz_n_rgba.ply, -30.0 0.0 -50.0, 0.0 0.0 0.0, 100.0 100.0 100.0, Random, 1.0 1.0 1.0 32.0
+model, on, on, ship, Corellian_Corvette_xyz_n_rgba.ply, 0.0 -20.0 10.0, 0.0 0.0 0.0, 10.0 10.0 10.0, Rainbow, 1.0 1.0 1.0 32.0
+
+light, on, sunlight, Directional, 0.0 0.0 0.0, 0.25 0.22 0.18 1.0, 0.0 0.01 0.005 0.0, -0.5 -1.0 -0.5 0.0, 0.0 0.0 0.0
