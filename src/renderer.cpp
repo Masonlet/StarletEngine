@@ -1,5 +1,5 @@
 #include <glad/glad.h>
-#include "renderer.hpp"
+#include "starletengine/renderer.hpp"
 #include "starletparsers/utils/log.hpp"
 #include "starletparsers/scene/light.hpp"
 

@@ -1,6 +1,6 @@
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
-#include "engine.hpp"
+#include "starletengine/engine.hpp"
 #include "starletparsers/utils/log.hpp"
 
 constexpr int default_width{ 1920 };

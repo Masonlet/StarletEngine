@@ -1,6 +1,6 @@
 #include <glad/glad.h> 
-#include "callbacks.hpp"
-#include "engine.hpp"
+#include "starletengine/callbacks.hpp"
+#include "starletengine/engine.hpp"
 #include <stdio.h>
 
 void error_callback(const int error, const char* description) {
