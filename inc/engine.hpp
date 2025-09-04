@@ -28,12 +28,14 @@ struct Engine {
 	float deltaTime{ 0.0f }, lastTime{ 0.0f };
 
 	bool initialize(const unsigned int width, const unsigned int height, const char* title);
-	bool setScene(const std::string& sceneIn = std::string(ASSET_DIR) + "/scenes/Default.txt") { return sceneManager.loadTxtScene(std::string(ASSET_DIR) + "/scenes/" + sceneIn + ".txt"); }
+	bool setScene(const std::string& sceneIn = "Default") { return sceneManager.loadTxtScene(assetPath + sceneIn + ".txt"); }
 	bool loadSceneAssets();
 
 	void run();
 
 private:
+	std::string assetPath;
+
 	bool setupShaders();
 	bool loadSceneMeshes();
 	bool loadSceneLighting();
