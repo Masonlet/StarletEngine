@@ -1,8 +1,8 @@
 #include <glad/glad.h> 
 #define GLFW_INCLUDE_NONE 
 #include <GLFW/glfw3.h>
-#include "starletengine/window.hpp"
-#include "starletparsers/utils/log.hpp"
+#include "StarletEngine/window.hpp"
+#include "StarletParsers/utils/log.hpp"
 #include <cstdio>
 
 Window::~Window() {

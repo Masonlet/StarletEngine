@@ -1,7 +1,7 @@
 #include <glad/glad.h>
-#include "starletengine/windowManager.hpp"
-#include "starletengine/callbacks.hpp"
-#include "starletparsers/utils/log.hpp"
+#include "StarletEngine/windowManager.hpp"
+#include "StarletEngine/callbacks.hpp"
+#include "StarletParsers/utils/log.hpp"
 #include <cstdio>
 
 constexpr int GL_MAJOR{ 3 };

@@ -1,10 +1,14 @@
 #pragma once
 
-#include "starletgraphics/shaderManager.hpp"
-#include "starletgraphics/meshManager.hpp"
-#include "starletgraphics/textureManager.hpp"
-#include "starletparsers/scene/model.hpp"
-#include "starletmath/mat4.hpp"
+class ShaderManager;
+class MeshManager;
+class TextureManager;
+struct Model;
+struct Vec3;
+struct Mat4;
+#include <map>
+#include <string>
+#include <vector>
 
 constexpr int SKYBOX_TU{ 20 };
 struct Light;

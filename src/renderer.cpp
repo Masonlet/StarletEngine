@@ -1,7 +1,12 @@
 #include <glad/glad.h>
-#include "starletengine/renderer.hpp"
-#include "starletparsers/utils/log.hpp"
-#include "starletparsers/scene/light.hpp"
+#include "StarletGraphics/shaderManager.hpp"
+#include "StarletGraphics/textureManager.hpp"
+#include "StarletGraphics/meshManager.hpp"
+#include "StarletScene/objects/model.hpp"
+#include "StarletMath/mat4.hpp"
+#include "StarletEngine/renderer.hpp"
+#include "StarletParsers/utils/log.hpp"
+#include "StarletScene/objects/light.hpp"
 
 bool Renderer::setProgram(unsigned int program) {
 	if (program == 0) return error("Renderer", "setProgram", "Program is 0");

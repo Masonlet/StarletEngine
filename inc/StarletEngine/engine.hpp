@@ -2,13 +2,13 @@
 
 #include "windowManager.hpp"
 #include "renderer.hpp"
-#include "starletgraphics/shaderManager.hpp"
-#include "starletgraphics/meshManager.hpp"
-#include "starletgraphics/textureManager.hpp"
-#include "starletcontrols/inputManager.hpp"
-#include "starletscene/sceneManager.hpp"
-#include "starletcontrols/modelController.hpp"
-#include "starletcontrols/cameraController.hpp"
+#include "StarletGraphics/shaderManager.hpp"
+#include "StarletGraphics/meshManager.hpp"
+#include "StarletGraphics/textureManager.hpp"
+#include "StarletScene/sceneManager.hpp"
+#include "StarletControls/inputManager.hpp"
+#include "StarletControls/modelController.hpp"
+#include "StarletControls/cameraController.hpp"
 
 struct Engine {
 	std::string assetPath;
@@ -18,6 +18,7 @@ struct Engine {
 	ShaderManager shaderManager;
 	MeshManager meshManager;
 	TextureManager textureManager;
+
 	SceneManager sceneManager;
 
 	InputManager inputManager;
