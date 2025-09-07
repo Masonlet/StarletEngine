@@ -46,7 +46,3 @@ Can be safely omitted on Windows if you're using Visual Studio
 | 0–9           | Switch between cameras |
 | P             | Toggle Wireframe       |
 | C             | Toggle Cursor          |
-| L             | Save current scene     |
-
-  
-
