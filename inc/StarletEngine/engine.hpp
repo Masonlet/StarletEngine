@@ -36,6 +36,8 @@ struct Engine {
 
 private:
 	bool setupShaders();
+	void setupGLState();
+
 	bool loadSceneMeshes();
 	bool loadSceneLighting();
 	bool loadSceneTextures();
