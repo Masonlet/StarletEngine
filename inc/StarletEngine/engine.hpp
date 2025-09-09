@@ -42,7 +42,7 @@ private:
 	bool loadSceneTextureConnections();
 
 	void updateTime(const float currentTime);
-	void handleKeyEvents(std::vector<KeyEvent> keyEvents);
+	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
 	void handleScrollEvents(double xOffset, double yOffset);
 	void renderFrame();
 };

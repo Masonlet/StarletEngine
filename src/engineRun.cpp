@@ -5,13 +5,14 @@
 
 void Engine::run() {
   windowManager.switchActiveWindowVisibility();
+  const Window* window = windowManager.getWindow();
 
-  while (!windowManager.getWindow()->shouldClose()) {
+  while (!window->shouldClose()) {
     updateTime(static_cast<float>(glfwGetTime()));
 
     inputManager.clear();
-    windowManager.getWindow()->pollEvents();
-    inputManager.update(windowManager.getWindow()->getGLFWwindow());
+    window->pollEvents();
+    inputManager.update(window->getGLFWwindow());
     handleKeyEvents(inputManager.consumeKeyEvents());
     handleScrollEvents(inputManager.consumeScrollX(), inputManager.consumeScrollY());
 
@@ -21,7 +22,7 @@ void Engine::run() {
     else modelController.update(*model, inputManager, deltaTime);
 
     renderFrame();
-    windowManager.getWindow()->swapBuffers();
+    window->swapBuffers();
   }
 }
 void Engine::updateTime(const float currentTime) {
@@ -43,30 +44,36 @@ void Engine::updateTime(const float currentTime) {
   lastTime = currentTime;
   deltaTime = smoothingFactor * deltaTime + (1.0f - smoothingFactor) * rawDelta;
 }
-void Engine::handleKeyEvents(std::vector<KeyEvent> keyEvents) {
-  for (KeyEvent event : keyEvents) {
-    if (event.action == GLFW_PRESS) {
-      if (event.key == GLFW_KEY_ESCAPE)	glfwSetWindowShouldClose(windowManager.getWindow()->getGLFWwindow(), GLFW_TRUE);
+void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
+  for (const KeyEvent event : keyEvents) {
+    if (event.action != GLFW_PRESS) continue;
 
-      if (event.key == GLFW_KEY_P) {
-        wireframe = !wireframe;
-        glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-      }
+    switch (event.key) {
+    case GLFW_KEY_ESCAPE:
+      glfwSetWindowShouldClose(windowManager.getWindow()->getGLFWwindow(), GLFW_TRUE);
+      break;
 
-      if (event.key == GLFW_KEY_C) {
-        GLFWwindow* window = windowManager.getWindow()->getGLFWwindow();
-        bool locked = glfwGetInputMode(window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED;
-        glfwSetInputMode(window, GLFW_CURSOR, locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        inputManager.setCursorLocked(locked);
-      }
+    case GLFW_KEY_P:
+      wireframe = !wireframe;
+      glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+      break;
 
-      if (event.key == GLFW_KEY_N) {
-        if (event.mods & GLFW_MOD_SHIFT) modelController.increment(sceneManager.scene.getObjectCount<Model>());
-        else										         modelController.decrement();
-      }
+    case GLFW_KEY_C: {
+      GLFWwindow* window = windowManager.getWindow()->getGLFWwindow();
+      bool locked = glfwGetInputMode(window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED;
+      glfwSetInputMode(window, GLFW_CURSOR, locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+      inputManager.setCursorLocked(locked);
+      break;
+    }
 
-      if (event.key >= GLFW_KEY_0 && event.key <= GLFW_KEY_9)
-        cameraController.setCamera(event.key - GLFW_KEY_0, sceneManager.scene.getObjectCount<Camera>());
+    case GLFW_KEY_N:
+      if (event.mods & GLFW_MOD_SHIFT) modelController.increment(sceneManager.scene.getObjectCount<Model>());
+      else										         modelController.decrement();
+      break;
+
+    default:
+      if (event.key >= GLFW_KEY_0 && event.key <= GLFW_KEY_9) cameraController.setCamera(event.key - GLFW_KEY_0, sceneManager.scene.getObjectCount<Camera>());
+      break;
     }
   }
 }
@@ -85,17 +92,18 @@ void Engine::renderFrame() {
     return;
   }
 
-  renderer.updateCameraUniforms(cam->pos, Mat4::lookAt(cam->pos, cam->front), Mat4::perspective(cam->fov, windowManager.getWindow()->getAspect(), cam->nearPlane, cam->farPlane));
   cameraController.update(*cam, inputManager, deltaTime);
+  renderer.updateCameraUniforms(cam->pos, Mat4::lookAt(cam->pos, cam->front), Mat4::perspective(cam->fov, windowManager.getWindow()->getAspect(), cam->nearPlane, cam->farPlane));
+
   renderer.updateLightUniforms(sceneManager.scene.getObjects<Light>());
 
-  Model* skyBox{ nullptr };
+  bool skyboxFound{ false };
   std::vector<const Model*> transparentInstances;
 
-  for (std::pair<const std::string, Model>& model : sceneManager.scene.getObjects<Model>()) {
-    Model& instance = model.second;
+  for (const std::pair<const std::string, Model>& model : sceneManager.scene.getObjects<Model>()) {
+    const Model& instance = model.second;
     if (instance.name == "skybox") {
-      skyBox = &instance;
+      skyboxFound = true;
       continue;
     }
 
@@ -123,19 +131,21 @@ void Engine::renderFrame() {
   for (const Model* instance : transparentInstances)
     renderer.drawModel(meshManager, textureManager, *instance);
 
-  if (skyBox) {
-    skyBox->transform.pos = { cam->pos, 0.0f };
-    renderer.bindSkyboxTexture(textureManager.getTextureID(skyBox->name));
+  if (skyboxFound) {
+    Model* skybox{ nullptr };
+    sceneManager.scene.getObjectByName(std::string("skybox"), skybox);
 
+    renderer.bindSkyboxTexture(textureManager.getTextureID(skybox->name));
     renderer.setModelIsSkybox(true);
-    skyBox->isVisible = true;
+    skybox->isVisible = true;
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
     glDepthMask(GL_FALSE);
-    renderer.drawModel(meshManager, textureManager, *skyBox);
+    skybox->transform.pos = { cam->pos, 0.0f };
+    renderer.drawModel(meshManager, textureManager, *skybox);
     glDepthMask(GL_TRUE);
     glCullFace(GL_BACK);
-    skyBox->isVisible = false;
+    skybox->isVisible = false;
     renderer.setModelIsSkybox(false);
   }
 

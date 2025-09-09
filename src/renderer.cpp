@@ -78,9 +78,9 @@ bool Renderer::setProgram(unsigned int program) {
 }
 
 void Renderer::cacheLightUniformLocations(int maxLights) {
-	if (maxLights <= 0) { 
-		lightUL.clear(); 
-		return; 
+	if (maxLights <= 0) {
+		lightUL.clear();
+		return;
 	}
 	lightUL.resize(static_cast<size_t>(maxLights));
 
@@ -115,7 +115,7 @@ void Renderer::updateLightUniforms(const std::map<std::string, Light>& lights) c
 		if (lightUL[i].param2 != -1) glUniform4f(lightUL[i].param2, L.enabled ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
 	}
 
-	for (int i = used; i < maxCached; ++i) 
+	for (int i = used; i < maxCached; ++i)
 		if (lightUL[i].param2 != -1) glUniform4f(lightUL[i].param2, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	updateLightCount(n);
@@ -146,7 +146,7 @@ bool Renderer::drawModel(MeshManager& meshManager, TextureManager& textureManage
 
 	Mesh* data;
 	if (!meshManager.getMesh(instance.meshPath, data)) return error("Renderer", "drawModel", "Could not find mesh: " + instance.meshPath);
-	 
+
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, Mat4::modelMatrix(instance.transform).models);
 	glUniformMatrix4fv(modelInverseTransposeLocation, 1, GL_FALSE, Mat4::modelMatrix(instance.transform).inverse().transpose().models);
 	glUniform4fv(modelSpecularLocation, 1, &instance.specular.x);
@@ -191,6 +191,6 @@ void Renderer::bindSkyboxTexture(unsigned int textureID) const {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 }
 
-void Renderer::setModelIsSkybox(bool isSkybox) const { 
-	glUniform1i(modelIsSkyboxLocation, isSkybox ? 1 : 0); 
+void Renderer::setModelIsSkybox(bool isSkybox) const {
+	glUniform1i(modelIsSkyboxLocation, isSkybox ? 1 : 0);
 }
