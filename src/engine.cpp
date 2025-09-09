@@ -8,7 +8,7 @@ constexpr int default_height{ 1200 };
 
 bool Engine::initialize(const unsigned int width, const unsigned int height, const char* title) {
   debugLog("Engine", "initialize", "Start time: " + std::to_string(glfwGetTime()), true);
-  
+
   if (!windowManager.createWindow(width, height, title)) return false;
   glfwSetWindowUserPointer(windowManager.getWindow()->getGLFWwindow(), this);
 
@@ -19,7 +19,7 @@ bool Engine::initialize(const unsigned int width, const unsigned int height, con
 }
 
 bool Engine::setupShaders() {
-	debugLog("Engine", "setupShaders", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "setupShaders", "Start time: " + std::to_string(glfwGetTime()), true);
 
   shaderManager.setBasePath(assetPath);
   if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
@@ -27,7 +27,7 @@ bool Engine::setupShaders() {
 
   if (!renderer.setProgram(shaderManager.getProgramID("shader1")))
     return error("Engine", "setupShaders", "");
-  
+
   return debugLog("Engine", "setupShaders", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 void Engine::setupGLState() {
@@ -52,7 +52,7 @@ void Engine::updateTime(const float currentTime) {
   constexpr float smoothingFactor = 0.9f;
 
   if (rawDelta > maxDelta) {
-		debugLog("Engine", "Tick", "deltaTime clamped to " + std::to_string(maxDelta) + " (was " + std::to_string(rawDelta) + ")", true);
+    debugLog("Engine", "Tick", "deltaTime clamped to " + std::to_string(maxDelta) + " (was " + std::to_string(rawDelta) + ")", true);
     rawDelta = maxDelta;
   }
 
@@ -92,9 +92,9 @@ bool Engine::loadSceneTextures() {
   textureManager.setBasePath(assetPath);
   for (const std::pair<const std::string, TextureData>& data : sceneManager.scene.getObjects<TextureData>()) {
     const TextureData& texture = data.second;
-    
+
     if (!texture.isCube) {
-      if(!textureManager.addTexture(texture.name, texture.faces[0]))
+      if (!textureManager.addTexture(texture.name, texture.faces[0]))
         return error("Engine", "loadSceneTextures", "Failed to load 2D texture: " + texture.name);
     }
     else if (!textureManager.addCubeTexture(texture.name, texture.faces))
@@ -109,7 +109,7 @@ bool Engine::loadSceneTextureConnections() {
   for (const std::pair<const std::string, TextureConnection>& data : sceneManager.scene.getObjects<TextureConnection>()) {
     const TextureConnection& connection = data.second;
     if (connection.slot >= Model::NUM_TEXTURES) return error("Engine", "loadSceneTextureConnection", "Slot out of range: " + std::to_string(connection.slot));
-    
+
     Model* model;
     if (!sceneManager.scene.getObjectByName<Model>(connection.modelName, model))
       return error("Engine", "loadSceneTextureConnection", "Model " + connection.modelName + " not found for connection " + connection.name);
@@ -132,7 +132,7 @@ bool Engine::loadSceneTextureConnections() {
     }
 
     TextureData* texture;
-    if(!sceneManager.scene.getObjectByName<TextureData>(connection.textureName, texture))
+    if (!sceneManager.scene.getObjectByName<TextureData>(connection.textureName, texture))
       return error("Engine", "loadSceneTextureConnection", "Texture " + connection.textureName + " not found for connection " + connection.name);
 
     model->useTextures = true;
@@ -145,9 +145,14 @@ bool Engine::loadSceneTextureConnections() {
 void Engine::run() {
   windowManager.switchActiveWindowVisibility();
 
-  while (!windowManager.getWindow()->shouldClose()) {	
+  while (!windowManager.getWindow()->shouldClose()) {
     updateTime(static_cast<float>(glfwGetTime()));
+
+    inputManager.clear();
+    windowManager.getWindow()->pollEvents();
     inputManager.update(windowManager.getWindow()->getGLFWwindow());
+    handleKeyEvents(inputManager.consumeKeyEvents());
+    handleScrollEvents(inputManager.consumeScrollX(), inputManager.consumeScrollY());
 
     Model* model{ nullptr };
     if (!sceneManager.scene.getObjectByIndex<Model>(modelController.current, model))
@@ -156,8 +161,40 @@ void Engine::run() {
 
     renderFrame();
     windowManager.getWindow()->swapBuffers();
-    windowManager.getWindow()->pollEvents();
   }
+}
+
+void Engine::handleKeyEvents(std::vector<KeyEvent> keyEvents) {
+  for (KeyEvent event : keyEvents) {
+    if (event.action == GLFW_PRESS) {
+      if (event.key == GLFW_KEY_ESCAPE)	glfwSetWindowShouldClose(windowManager.getWindow()->getGLFWwindow(), GLFW_TRUE);
+
+      if (event.key == GLFW_KEY_P) {
+        wireframe = !wireframe;
+        glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+      }
+
+      if (event.key == GLFW_KEY_C) {
+        GLFWwindow* window = windowManager.getWindow()->getGLFWwindow();
+        bool locked = glfwGetInputMode(window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED;
+        glfwSetInputMode(window, GLFW_CURSOR, locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        inputManager.setCursorLocked(locked);
+      }
+
+      if (event.key == GLFW_KEY_N) {
+        if (event.mods & GLFW_MOD_SHIFT) modelController.increment(sceneManager.scene.getObjectCount<Model>());
+        else										         modelController.decrement();
+      }
+
+      if (event.key >= GLFW_KEY_0 && event.key <= GLFW_KEY_9)
+        cameraController.setCamera(event.key - GLFW_KEY_0, sceneManager.scene.getObjectCount<Camera>());
+    }
+  }
+}
+void Engine::handleScrollEvents(double xOffset, double yOffset) {
+  Camera* cam{ nullptr };
+  if (!sceneManager.scene.getObjectByIndex<Camera>(cameraController.current, cam)) return;
+  cameraController.adjustFov(*cam, static_cast<float>(-yOffset));
 }
 
 void Engine::renderFrame() {
@@ -175,6 +212,7 @@ void Engine::renderFrame() {
 
   Model* skyBox{ nullptr };
   std::vector<const Model*> transparentInstances;
+
   for (std::pair<const std::string, Model>& model : sceneManager.scene.getObjects<Model>()) {
     Model& instance = model.second;
     if (instance.name == "skybox") {
