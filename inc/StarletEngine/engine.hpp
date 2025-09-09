@@ -29,9 +29,7 @@ struct Engine {
 	float deltaTime{ 0.0f }, lastTime{ 0.0f };
 
 	bool initialize(const unsigned int width, const unsigned int height, const char* title);
-	bool setScene(const std::string& sceneIn = "Default") { return sceneManager.loadTxtScene(assetPath + "/scenes/" + sceneIn + ".txt"); }
-	bool loadSceneAssets();
-
+	bool loadScene(const std::string& sceneIn = "Default");
 	void run();
 
 private:
