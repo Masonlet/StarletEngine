@@ -40,9 +40,11 @@ Can be safely omitted on Windows if you're using Visual Studio
 | **Key**       | **Action**             |
 | ------------- | ---------------------- |
 | Esc           | Exit program           |
-| W / A / S / D | Move camera            |
-| Space / LCtrl | Up / Down camera       |
-| Mouse         | Look around            |
+
+
+## Debug Controls
+| **Key**       | **Action**             |
+| ------------- | ---------------------- |
 | 0–9           | Switch between cameras |
 | P             | Toggle Wireframe       |
 | C             | Toggle Cursor          |
