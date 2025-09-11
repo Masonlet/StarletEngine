@@ -53,6 +53,7 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
       glfwSetWindowShouldClose(windowManager.getWindow()->getGLFWwindow(), GLFW_TRUE);
       break;
 
+#ifndef NDEBUG
     case GLFW_KEY_P:
       wireframe = !wireframe;
       glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
@@ -70,9 +71,12 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
       if (event.mods & GLFW_MOD_SHIFT) modelController.increment(sceneManager.scene.getObjectCount<Model>());
       else										         modelController.decrement();
       break;
+#endif
 
     default:
+#ifndef NDEBUG
       if (event.key >= GLFW_KEY_0 && event.key <= GLFW_KEY_9) cameraController.setCamera(event.key - GLFW_KEY_0, sceneManager.scene.getObjectCount<Camera>());
+#endif
       break;
     }
   }
