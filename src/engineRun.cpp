@@ -16,11 +16,6 @@ void Engine::run() {
     handleKeyEvents(inputManager.consumeKeyEvents());
     handleScrollEvents(inputManager.consumeScrollX(), inputManager.consumeScrollY());
 
-    Model* model{ nullptr };
-    if (!sceneManager.scene.getObjectByIndex<Model>(modelController.current, model))
-      error("Engine", "run", "No active model found for selected model");
-    else modelController.update(*model, inputManager, deltaTime);
-
     renderFrame();
     window->swapBuffers();
   }
@@ -66,18 +61,7 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
       inputManager.setCursorLocked(locked);
       break;
     }
-
-    case GLFW_KEY_N:
-      if (event.mods & GLFW_MOD_SHIFT) modelController.increment(sceneManager.scene.getObjectCount<Model>());
-      else										         modelController.decrement();
-      break;
 #endif
-
-    default:
-#ifndef NDEBUG
-      if (event.key >= GLFW_KEY_0 && event.key <= GLFW_KEY_9) cameraController.setCamera(event.key - GLFW_KEY_0, sceneManager.scene.getObjectCount<Camera>());
-#endif
-      break;
     }
   }
 }
@@ -98,7 +82,6 @@ void Engine::renderFrame() {
 
   cameraController.update(*cam, inputManager, deltaTime);
   renderer.updateCameraUniforms(cam->pos, Mat4::lookAt(cam->pos, cam->front), Mat4::perspective(cam->fov, windowManager.getWindow()->getAspect(), cam->nearPlane, cam->farPlane));
-
   renderer.updateLightUniforms(sceneManager.scene.getObjects<Light>());
 
   bool skyboxFound{ false };
