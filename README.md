@@ -12,7 +12,7 @@ This project uses **CMake**. Follow these steps to build:
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/Masonlet/StarletEngine.git
-cd LearningOpenGL
+cd StarletEngine
 ```
 
 ### 2. Create a Build Directory and Generate Build Files
