@@ -40,6 +40,8 @@ private:
 	bool loadSceneLighting();
 	bool loadSceneTextures();
 	bool loadSceneTextureConnections();
+	bool loadScenePrimitives();
+	bool loadSceneGrids();
 
 	void updateTime(const float currentTime);
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);

@@ -9,7 +9,12 @@ bool Engine::loadScene(const std::string& sceneIn) {
     if (!sceneManager.loadTxtScene(assetPath + "/scenes/Default.txt"))
       return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load default scene");
 
-  return loadSceneMeshes() && loadSceneLighting() && loadSceneTextures() && loadSceneTextureConnections();
+  return loadSceneMeshes()
+    && loadSceneLighting()
+    && loadSceneTextures()
+    && loadSceneTextureConnections()
+    && loadScenePrimitives()
+    && loadSceneGrids();
 }
 
 bool Engine::loadSceneMeshes() {
@@ -87,4 +92,102 @@ bool Engine::loadSceneTextureConnections() {
   }
   return debugLog("Engine", "loadSceneTextureConnections", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
+bool Engine::loadScenePrimitives() {
+  debugLog("Engine", "loadScenePrimitives", "Start time: " + std::to_string(glfwGetTime()), true);
 
+  for (std::pair<const std::string, Primitive>& data : sceneManager.scene.getObjects<Primitive>()) {
+    const Primitive& primitive = data.second;
+
+    bool ok = false;
+    switch (primitive.type) {
+    case PrimitiveType::Triangle:
+      ok = meshManager.createTriangle(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
+      break;
+    case PrimitiveType::Square:
+      ok = meshManager.createSquare(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
+      break;
+    case PrimitiveType::Cube:
+      ok = meshManager.createCube(primitive.name, primitive.transform.size, primitive.colour);
+      break;
+    }
+    if (!ok) return error("Engine", "loadScenePrimitives", "Failed to create primitive mesh: " + primitive.name);
+
+    Mesh* primMesh;
+    if (!meshManager.getMesh(primitive.name, primMesh))
+      return error("Engine", "loadScenePrimitives", "Failed to load primitive mesh: " + primitive.name);
+
+    Model m{};
+    m.name = primitive.name;
+    m.meshPath = primitive.name;
+    m.transform = primitive.transform;
+    m.useTextures = false;
+    for (unsigned i = 0; i < Model::NUM_TEXTURES; ++i) {
+      m.textureNames[i].clear();
+      m.textureMixRatio[i] = 0.0f;
+    }
+    m.colour = primitive.colour;
+    m.colourMode = primitive.colourMode;
+    if (!sceneManager.scene.addObject<Model>(m, primitive.name.c_str()))
+      return error("Engine", "loadScenePrimitives", "Failed to add primitive model: " + primitive.name);
+  }
+
+  return debugLog("Engine", "loadScenePrimitives", "Finish time: " + std::to_string(glfwGetTime()), true);
+}
+bool Engine::loadSceneGrids() {
+  debugLog("Engine", "loadSceneGrids", "Start time: " + std::to_string(glfwGetTime()), true);
+
+  for (std::pair<const std::string, Grid>& data : sceneManager.scene.getObjects<Grid>()) {
+    const Grid& grid = data.second;
+
+    std::string sharedName = grid.name + (grid.type == GridType::Square ? "_sharedSquare" : "_sharedCube");
+
+    bool ok = false;
+    switch (grid.type) {
+    case GridType::Square:
+      ok = meshManager.createSquare(sharedName, { grid.transform.size.x, grid.transform.size.y }, grid.colour);
+      break;
+    case GridType::Cube:
+      ok = meshManager.createCube(sharedName, grid.transform.size, grid.colour);
+      break;
+    }
+
+    const int gridSide = (grid.count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid.count)))) : 0;
+    for (int i = 0; i < 0 + grid.count; ++i) {
+      const int localIdx = i - 0;
+      const int row = (gridSide > 0) ? (localIdx / gridSide) : 0;
+      const int col = (gridSide > 0) ? (localIdx % gridSide) : 0;
+
+      Vec3 pos{};
+      if (grid.type == GridType::Square) {
+        pos = { grid.spacing * static_cast<float>(col),
+                grid.spacing * static_cast<float>(row),
+                0.0f };
+      }
+      else {
+        pos = { grid.spacing * static_cast<float>(col),
+                0.0f,
+                grid.spacing * static_cast<float>(row) };
+      }
+
+      Model m{};
+      m.name = grid.name + "_instance_" + std::to_string(i);
+      m.meshPath = sharedName;
+      m.useTextures = false;
+      for (unsigned ti = 0; ti < Model::NUM_TEXTURES; ++ti) {
+        m.textureNames[ti].clear();
+        m.textureMixRatio[ti] = 0.0f;
+      }
+      m.colour = grid.colour;
+      m.colourMode = grid.colourMode;
+
+      m.transform.pos = { pos, 1.0f };
+      m.transform.rot = grid.transform.rot;
+      m.transform.size = grid.transform.size;
+
+      if (!sceneManager.scene.addObject<Model>(m, m.name.c_str()))
+        return error("Engine", "loadSceneGrids", "Failed to add grid instance model: " + m.name);
+    }
+  }
+
+  return debugLog("Engine", "loadSceneGrids", "Finish time: " + std::to_string(glfwGetTime()), true);
+}
