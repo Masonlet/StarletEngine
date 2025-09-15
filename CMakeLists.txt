@@ -1,27 +1,20 @@
 cmake_minimum_required(VERSION 3.23)
-project(StarletEngine LANGUAGES C CXX)
+
+set(ENGINE_NAME StarletEngine)
+set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+
+project(${ENGINE_NAME} LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_SUPPRESS_REGENERATION ON)
 
-add_library(StarletEngine STATIC)
+file(GLOB_RECURSE ENGINE_SRC     CONFIGURE_DEPENDS ${SRC_DIR}/*.cpp)
+file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS ${INC_DIR}/*.hpp)
 
-file(GLOB_RECURSE ENGINE_SRC     CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/inc/*.hpp)
-
-target_sources(StarletEngine
-  PRIVATE ${ENGINE_SRC}
-  PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/inc
-    FILES ${ENGINE_HEADERS}
-)
-
-target_include_directories(StarletEngine
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-    $<INSTALL_INTERFACE:include>
-)
+add_library(${ENGINE_NAME} STATIC)
+target_sources(${ENGINE_NAME} PUBLIC ${ENGINE_HEADERS} PRIVATE ${ENGINE_SRC})
+target_include_directories(${ENGINE_NAME} PUBLIC $<BUILD_INTERFACE:${INC_DIR}> $<INSTALL_INTERFACE:include>)
 
 include(FetchContent)
 add_library(glad STATIC ${CMAKE_CURRENT_SOURCE_DIR}/external/src/glad/glad.c)
@@ -45,7 +38,7 @@ target_link_libraries(StarletParsers PUBLIC glad)
 target_link_libraries(StarletGraphics PUBLIC glad)
 
 find_package(OpenGL REQUIRED)
-target_link_libraries(StarletEngine 
+target_link_libraries(${ENGINE_NAME}
   PUBLIC
   glad glfw OpenGL::GL 
   StarletMath StarletParsers StarletScene StarletGraphics StarletControls
