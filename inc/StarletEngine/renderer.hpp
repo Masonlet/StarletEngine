@@ -4,6 +4,7 @@ class ShaderManager;
 class MeshManager;
 class TextureManager;
 struct Model;
+struct Mesh;
 struct Vec3;
 struct Mat4;
 #include <map>
@@ -18,6 +19,8 @@ public:
 	bool setProgram(unsigned int program);
 	unsigned int getProgram() const { return program; }
 
+	void updateModelUniforms(const Model& instance, const Mesh& data) const;
+
 	void updateCameraUniforms(const Vec3& eye, const Mat4& view, const Mat4& projection) const;
 
 	void cacheLightUniformLocations(int maxLights);
@@ -25,7 +28,9 @@ public:
 	void updateLightCount(int count) const;
 
 	bool drawModel(MeshManager& meshManager, TextureManager& textureManager, const Model& instance) const;
-	void setModelIsSkybox(bool isSkybox) const; 
+	bool drawSkybox(MeshManager& meshManager, TextureManager& textureManager, const Model& skybox, const Vec3& cameraPos) const;
+
+	void setModelIsSkybox(bool isSkybox) const;
 
 	void bindSkyboxTexture(unsigned int texture) const;
 
@@ -42,6 +47,14 @@ private:
 	int modelUseTexturesLocation{ -1 }, modelTexMixRatiosLocation{ -1 };
 	int modelIsSkyboxLocation{ -1 }, skyboxTextureLocation{ -1 };
 	int lightCountLocation{ -1 }, ambientLightLocation{ -1 };
+
+	bool cacheUniformLocations();
+	bool cacheTextureUniforms();
+	bool cacheCameraUniforms();
+	bool cacheModelUniforms();
+	bool cacheLightUniforms();
+
+	bool getUniformLocation(int& location, const char* name) const;
 
 	struct LightUL {
 		int position{ -1 };

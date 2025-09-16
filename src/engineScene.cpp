@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 
 bool Engine::loadScene(const std::string& sceneIn) {
+  debugLog("Engine", "loadScene", "Start time: " + std::to_string(glfwGetTime()), true);
+
   if (!sceneManager.loadTxtScene(assetPath + "/scenes/" + sceneIn + ".txt"))
     return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
 
@@ -14,7 +16,8 @@ bool Engine::loadScene(const std::string& sceneIn) {
     && loadSceneTextures()
     && loadSceneTextureConnections()
     && loadScenePrimitives()
-    && loadSceneGrids();
+    && loadSceneGrids()
+    && debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()), true);
 }
 
 bool Engine::loadSceneMeshes() {

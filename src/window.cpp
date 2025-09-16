@@ -20,15 +20,15 @@ bool Window::createWindow(const unsigned int widthIn, const unsigned int heightI
 	return true;
 }
 
-void Window::pollEvents() const { 
-	glfwPollEvents(); 
+void Window::pollEvents() const {
+	glfwPollEvents();
 }
-void Window::swapBuffers() const { 
-	glfwSwapBuffers(window); 
+void Window::swapBuffers() const {
+	glfwSwapBuffers(window);
 }
 
-bool Window::shouldClose() const { 
-	return glfwWindowShouldClose(window); 
+bool Window::shouldClose() const {
+	return glfwWindowShouldClose(window);
 }
 void Window::updateViewport(const unsigned int widthIn, const unsigned int heightIn) {
 	width = widthIn;

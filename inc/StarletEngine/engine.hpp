@@ -32,6 +32,10 @@ struct Engine {
 	bool loadScene(const std::string& sceneIn = "Default");
 	void run();
 
+	Camera* getActiveCamera();
+
+	void toggleCursorLock();
+
 private:
 	bool setupShaders();
 	void setupGLState();
@@ -44,7 +48,12 @@ private:
 	bool loadSceneGrids();
 
 	void updateTime(const float currentTime);
+	void updateEngineState(Camera& cam);
+
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
 	void handleScrollEvents(double xOffset, double yOffset);
+
 	void renderFrame();
+	void renderModels(const Vec3& eye);
+	void renderSkybox(const Vec3& eye);
 };

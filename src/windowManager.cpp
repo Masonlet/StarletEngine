@@ -2,6 +2,7 @@
 #include "StarletEngine/windowManager.hpp"
 #include "StarletEngine/callbacks.hpp"
 #include "StarletParsers/utils/log.hpp"
+#include "StarletControls/inputManager.hpp"
 #include <cstdio>
 
 constexpr int GL_MAJOR{ 3 };
@@ -15,9 +16,17 @@ WindowManager::~WindowManager() {
   destroyWindow();
   glfwTerminate();
 }
-
+void WindowManager::pollEvents() const {
+  if (window) window->pollEvents();
+}
+void WindowManager::swapBuffers() const {
+  if (window) window->swapBuffers();
+}
+bool WindowManager::shouldClose() const {
+  return window ? window->shouldClose() : true;
+}
 bool WindowManager::createWindow(const unsigned int width, const unsigned int height, const char* title) {
-	debugLog("WindowManager", "createWindow", "Start time : " + std::to_string(glfwGetTime()), true);
+  debugLog("WindowManager", "createWindow", "Start time : " + std::to_string(glfwGetTime()), true);
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_MAJOR);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_MINOR);
@@ -31,7 +40,7 @@ bool WindowManager::createWindow(const unsigned int width, const unsigned int he
   }
 
   glfwMakeContextCurrent(window->getGLFWwindow());
-  if (!initGLADOnce()) {
+  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
     delete window;
     window = nullptr;
     return error("WindowManager", "createWindow", "Failed to initialize GLAD");
@@ -56,10 +65,6 @@ void WindowManager::destroyWindow() {
   window = nullptr;
 }
 
-bool WindowManager::initGLADOnce() {
-  return gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) ? true : error("WindowManager", "initGLAD", "Failed to initialize GLAD");
-}
-
 void WindowManager::setInitialViewport() {
   int w = 0, h = 0;
   glfwGetFramebufferSize(window->getGLFWwindow(), &w, &h);
@@ -71,8 +76,16 @@ void WindowManager::setInitialViewport() {
 }
 
 void WindowManager::switchActiveWindowVisibility() {
-  if (window) glfwGetWindowAttrib(getWindow()->getGLFWwindow(), GLFW_VISIBLE) 
-              ? glfwHideWindow(getWindow()->getGLFWwindow()) 
-              : glfwShowWindow(getWindow()->getGLFWwindow());
+  if (window) glfwGetWindowAttrib(getWindow()->getGLFWwindow(), GLFW_VISIBLE)
+    ? glfwHideWindow(getWindow()->getGLFWwindow())
+    : glfwShowWindow(getWindow()->getGLFWwindow());
   else debugLog("WindowManager", "switchActiveWindowVisibility", "No active window to switch visibility.");
+}
+
+void WindowManager::updateInput(InputManager& inputManager) {
+  if (window) inputManager.update(window->getGLFWwindow());
+}
+
+void WindowManager::requestClose() {
+  if (window) glfwSetWindowShouldClose(window->getGLFWwindow(), GLFW_TRUE);
 }
