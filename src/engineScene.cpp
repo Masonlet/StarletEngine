@@ -4,26 +4,24 @@
 bool Engine::loadScene(const std::string& sceneIn) {
   debugLog("Engine", "loadScene", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  if (!sceneManager.loadTxtScene(assetPath + "/scenes/" + sceneIn + ".txt"))
+  if (sceneIn.empty() && !sceneManager.loadTxtScene(assetPath + "/scenes/EmptyScene.txt"))
+    return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
+  else if (!sceneManager.loadTxtScene(assetPath + "/scenes/" + sceneIn + ".txt"))
     return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
 
-  if (sceneManager.scene.getScenePath().empty())
-    if (!sceneManager.loadTxtScene(assetPath + "/scenes/Default.txt"))
-      return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load default scene");
-
-  return loadSceneMeshes()
-    && loadSceneLighting()
-    && loadSceneTextures()
-    && loadSceneTextureConnections()
-    && loadScenePrimitives()
-    && loadSceneGrids()
-    && debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()), true);
+  bool ok = true;
+  ok &= loadSceneMeshes();
+  ok &= loadSceneLighting();
+  ok &= loadSceneTextures();
+  ok &= loadSceneTextureConnections();
+  ok &= loadScenePrimitives();
+  ok &= loadSceneGrids();
+  return ok ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()), true) : false;
 }
 
 bool Engine::loadSceneMeshes() {
   debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  meshManager.setBasePath(assetPath);
   for (const std::pair<const std::string, Model>& model : sceneManager.scene.getObjects<Model>())
     if (!meshManager.addMesh(model.second.meshPath))
       return error("Engine", "loadSceneMeshes", "Failed to load mesh: " + model.second.meshPath);
@@ -43,7 +41,6 @@ bool Engine::loadSceneLighting() {
 bool Engine::loadSceneTextures() {
   debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  textureManager.setBasePath(assetPath);
   for (const std::pair<const std::string, TextureData>& data : sceneManager.scene.getObjects<TextureData>()) {
     const TextureData& texture = data.second;
 

@@ -61,8 +61,10 @@ bool WindowManager::createWindow(const unsigned int width, const unsigned int he
   return debugLog("WindowManager", "createWindow", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 void WindowManager::destroyWindow() {
-  delete window;
-  window = nullptr;
+  if (window) {
+    delete window;
+    window = nullptr;
+  }
 }
 
 void WindowManager::setInitialViewport() {
@@ -85,7 +87,9 @@ void WindowManager::switchActiveWindowVisibility() {
 void WindowManager::updateInput(InputManager& inputManager) {
   if (window) inputManager.update(window->getGLFWwindow());
 }
-
+void WindowManager::setWindowPointer(void* userPointer) const {
+  if (window) glfwSetWindowUserPointer(getWindow()->getGLFWwindow(), userPointer);
+}
 void WindowManager::requestClose() {
   if (window) glfwSetWindowShouldClose(window->getGLFWwindow(), GLFW_TRUE);
 }

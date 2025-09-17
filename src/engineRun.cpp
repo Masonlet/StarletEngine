@@ -28,11 +28,7 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
     case GLFW_KEY_ESCAPE: windowManager.requestClose(); break;
 
 #ifndef NDEBUG
-    case GLFW_KEY_P:
-      wireframe = !wireframe;
-      glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-      break;
-
+    case GLFW_KEY_P: toggleWireframe();  break;
     case GLFW_KEY_C: toggleCursorLock(); break;
 #endif
     }
@@ -62,21 +58,4 @@ void Engine::updateTime(const float currentTime) {
 
   lastTime = currentTime;
   deltaTime = smoothingFactor * deltaTime + (1.0f - smoothingFactor) * rawDelta;
-}
-
-Camera* Engine::getActiveCamera() {
-  Camera* cam{ nullptr };
-  if (!sceneManager.scene.getObjectByIndex<Camera>(cameraController.current, cam)) {
-    error("Engine", "getActiveCamera", "No active camera found for selected camera");
-    return nullptr;
-  }
-  return cam;
-}
-
-void Engine::toggleCursorLock() {
-  GLFWwindow* window = windowManager.getWindow()->getGLFWwindow();
-  bool wasLocked = glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
-
-  glfwSetInputMode(window, GLFW_CURSOR, wasLocked ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-  inputManager.setCursorLocked(!wasLocked);
 }

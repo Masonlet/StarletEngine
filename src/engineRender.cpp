@@ -47,7 +47,6 @@ void Engine::renderModels(const Vec3& eye) {
   }
 
   for (const Model* instance : transparentInstances) renderer.drawModel(meshManager, textureManager, *instance);
-
 }
 void Engine::renderSkybox(const Vec3& eye) {
   Model* skybox{ nullptr };

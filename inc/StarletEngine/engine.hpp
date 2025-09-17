@@ -10,42 +10,38 @@
 #include "StarletControls/modelController.hpp"
 #include "StarletControls/cameraController.hpp"
 
-struct Engine {
-	std::string assetPath;
-
-	WindowManager windowManager;
-	Renderer renderer;
-	ShaderManager shaderManager;
-	MeshManager meshManager;
-	TextureManager textureManager;
-
-	SceneManager sceneManager;
-
+class Engine {
+public:
 	InputManager inputManager;
-	ModelController modelController;
-	FreeCameraController cameraController;
+	WindowManager windowManager;
 
-	bool wireframe{ false };
-	float deltaTime{ 0.0f }, lastTime{ 0.0f };
+	inline void setAssetPath(const std::string& path) { assetPath = path; }
+	const std::string& getAssetPath() const { return assetPath; }
 
 	bool initialize(const unsigned int width, const unsigned int height, const char* title);
 	bool loadScene(const std::string& sceneIn = "Default");
 	void run();
 
 	Camera* getActiveCamera();
-
 	void toggleCursorLock();
+	void toggleWireframe();
 
 private:
+	std::string assetPath;
+	bool wireframe{ false };
+	float deltaTime{ 0.0f }, lastTime{ 0.0f };
+
+	Renderer renderer;
+	ShaderManager shaderManager;
+	MeshManager meshManager;
+	TextureManager textureManager;
+	SceneManager sceneManager;
+	ModelController modelController;
+	FreeCameraController cameraController;
+
+	void setAssetPaths();
 	bool setupShaders();
 	void setupGLState();
-
-	bool loadSceneMeshes();
-	bool loadSceneLighting();
-	bool loadSceneTextures();
-	bool loadSceneTextureConnections();
-	bool loadScenePrimitives();
-	bool loadSceneGrids();
 
 	void updateTime(const float currentTime);
 	void updateEngineState(Camera& cam);
@@ -56,4 +52,12 @@ private:
 	void renderFrame();
 	void renderModels(const Vec3& eye);
 	void renderSkybox(const Vec3& eye);
+
+	// To be moved.. maybe?
+	bool loadSceneMeshes();
+	bool loadSceneLighting();
+	bool loadSceneTextures();
+	bool loadSceneTextureConnections();
+	bool loadScenePrimitives();
+	bool loadSceneGrids();
 };

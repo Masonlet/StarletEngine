@@ -19,6 +19,8 @@ public:
 
   void switchActiveWindowVisibility();
   void updateInput(InputManager& inputManager);
+  void setWindowPointer(void* userPointer) const;
+
   void requestClose();
 
 private:

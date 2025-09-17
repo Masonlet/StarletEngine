@@ -5,23 +5,28 @@ bool Engine::initialize(const unsigned int width, const unsigned int height, con
   debugLog("Engine", "initialize", "Start time: " + std::to_string(glfwGetTime()), true);
 
   if (!windowManager.createWindow(width, height, title)) return false;
-  glfwSetWindowUserPointer(windowManager.getWindow()->getGLFWwindow(), this);
+  windowManager.setWindowPointer(this);
 
+  setAssetPaths();
   if (!setupShaders()) return false;
-
   setupGLState();
+
   return debugLog("Engine", "initialize", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 
+void Engine::setAssetPaths() {
+  shaderManager.setBasePath(assetPath);
+  meshManager.setBasePath(assetPath);
+  textureManager.setBasePath(assetPath);
+}
 bool Engine::setupShaders() {
   debugLog("Engine", "setupShaders", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  shaderManager.setBasePath(assetPath);
   if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
     return error("Engine", "setupShaders", "Failed to create shader program from file");
 
   if (!renderer.setProgram(shaderManager.getProgramID("shader1")))
-    return error("Engine", "setupShaders", "");
+    return error("Engine", "setupShaders", "Failed to set program to shader1");
 
   return debugLog("Engine", "setupShaders", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
