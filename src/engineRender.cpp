@@ -16,7 +16,7 @@ void Engine::renderFrame() {
 
 void Engine::updateEngineState(Camera& cam) {
   cameraController.update(cam, inputManager, deltaTime);
-  renderer.updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, windowManager.getWindow()->getAspect(), cam.nearPlane, cam.farPlane));
+  renderer.updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, windowManager.getAspect(), cam.nearPlane, cam.farPlane));
   renderer.updateLightUniforms(sceneManager.scene.getObjects<Light>());
 }
 

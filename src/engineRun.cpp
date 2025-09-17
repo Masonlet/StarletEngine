@@ -1,6 +1,5 @@
 #include "StarletEngine/engine.hpp"
 #include "StarletParsers/utils/log.hpp"
-#include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
 void Engine::run() {

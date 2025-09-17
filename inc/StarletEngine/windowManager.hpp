@@ -1,6 +1,7 @@
 #pragma once
 
 #include "window.hpp"
+#include <memory>
 
 class InputManager;
 
@@ -10,21 +11,24 @@ public:
   ~WindowManager();
 
   bool createWindow(const unsigned int width, const unsigned int height, const char* title);
-  void destroyWindow();
+  inline bool shouldClose() const { return activeWindow ? activeWindow->shouldClose() : true; }
 
-  inline Window* getWindow() const { return window; }
-  void pollEvents() const;
-  void swapBuffers() const;
-  bool shouldClose() const;
+  inline unsigned int getWidth()      const { return activeWindow ? activeWindow->getWidth() : 0; }
+  inline unsigned int getHeight()     const { return activeWindow ? activeWindow->getHeight() : 0; }
+  inline float        getAspect()     const { return activeWindow ? static_cast<float>(activeWindow->getWidth()) / static_cast<float>(activeWindow->getHeight()) : -1.0; }
 
-  void switchActiveWindowVisibility();
-  void updateInput(InputManager& inputManager);
-  void setWindowPointer(void* userPointer) const;
+  inline void pollEvents()   const { if (activeWindow) activeWindow->pollEvents(); }
+  inline void swapBuffers()  const { if (activeWindow) activeWindow->swapBuffers(); }
+  inline void requestClose() const { if (activeWindow) activeWindow->requestClose(); }
 
-  void requestClose();
+  inline void setWindowPointer(void* userPointer) const { if (activeWindow) activeWindow->setWindowPointer(userPointer); }
+
+  inline void updateInput(InputManager& inputManager) { if (activeWindow) activeWindow->updateInput(inputManager); }
+  inline void updateViewport(const unsigned int width, const unsigned int height) { if (activeWindow) activeWindow->updateViewport(width, height); }
+
+  inline bool switchActiveWindowVisibility() const { return activeWindow ? activeWindow->switchActiveWindowVisibility() : false; }
+  inline bool switchCursorLock() const { return activeWindow ? activeWindow->switchCursorLock() : false; }
 
 private:
-  Window* window = nullptr;
-
-  void setInitialViewport();
+  std::unique_ptr<Window> activeWindow;
 };

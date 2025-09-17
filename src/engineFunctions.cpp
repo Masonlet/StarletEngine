@@ -12,10 +12,7 @@ Camera* Engine::getActiveCamera() {
 }
 
 void Engine::toggleCursorLock() {
-  GLFWwindow* window = windowManager.getWindow()->getGLFWwindow();
-  bool wasLocked = glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
-
-  glfwSetInputMode(window, GLFW_CURSOR, wasLocked ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+  bool wasLocked = windowManager.switchCursorLock();
   inputManager.setCursorLocked(!wasLocked);
 }
 

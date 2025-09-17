@@ -1,18 +1,19 @@
 #pragma once
 
-class ShaderManager;
-class MeshManager;
-class TextureManager;
-struct Model;
-struct Mesh;
-struct Vec3;
-struct Mat4;
 #include <map>
 #include <string>
 #include <vector>
 
-constexpr int SKYBOX_TU{ 20 };
+class ShaderManager;
+class MeshManager;
+class TextureManager;
+struct Vec3;
+struct Mat4;
+struct Mesh;
+struct Model;
 struct Light;
+
+constexpr int SKYBOX_TU{ 20 };
 
 class Renderer {
 public:

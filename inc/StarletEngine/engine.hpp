@@ -1,7 +1,7 @@
 #pragma once
 
-#include "windowManager.hpp"
 #include "renderer.hpp"
+#include "windowManager.hpp"
 #include "StarletGraphics/shaderManager.hpp"
 #include "StarletGraphics/meshManager.hpp"
 #include "StarletGraphics/textureManager.hpp"
@@ -12,9 +12,6 @@
 
 class Engine {
 public:
-	InputManager inputManager;
-	WindowManager windowManager;
-
 	inline void setAssetPath(const std::string& path) { assetPath = path; }
 	const std::string& getAssetPath() const { return assetPath; }
 
@@ -23,6 +20,12 @@ public:
 	void run();
 
 	Camera* getActiveCamera();
+
+	inline void updateViewport(const int width, const int height) { windowManager.updateViewport(width, height); }
+
+	inline void onKey(const KeyEvent& event) { inputManager.onKey(event); }
+	inline void onScroll(double xOffset, double yOffset) { inputManager.onScroll(xOffset, yOffset); }
+
 	void toggleCursorLock();
 	void toggleWireframe();
 
@@ -32,10 +35,14 @@ private:
 	float deltaTime{ 0.0f }, lastTime{ 0.0f };
 
 	Renderer renderer;
+	WindowManager windowManager;
+	SceneManager sceneManager;
+
 	ShaderManager shaderManager;
 	MeshManager meshManager;
 	TextureManager textureManager;
-	SceneManager sceneManager;
+
+	InputManager inputManager;
 	ModelController modelController;
 	FreeCameraController cameraController;
 
