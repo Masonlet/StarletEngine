@@ -27,13 +27,6 @@ if(NOT TARGET ${ENGINE_NAME})
   target_include_directories(glad PUBLIC ${ENGINE_EXTERN}/inc)
   set_target_properties(glad PROPERTIES FOLDER "External")
 
-  FetchContent_Declare(StarletMath GIT_REPOSITORY https://github.com/masonlet/starletmath.git GIT_TAG main)
-  FetchContent_Declare(StarletParsers GIT_REPOSITORY https://github.com/masonlet/starletparsers.git GIT_TAG main)
-  FetchContent_Declare(StarletScene GIT_REPOSITORY https://github.com/masonlet/starletscene.git GIT_TAG main)
-  FetchContent_Declare(StarletGraphics GIT_REPOSITORY https://github.com/masonlet/starletgraphics.git GIT_TAG main)
-  FetchContent_Declare(StarletControls GIT_REPOSITORY https://github.com/masonlet/starletcontrols.git GIT_TAG main)
-  FetchContent_MakeAvailable(StarletMath StarletParsers StarletScene StarletGraphics StarletControls)
-
   file(GLOB_RECURSE ENGINE_SRC CONFIGURE_DEPENDS ${ENGINE_SRC_DIR}/*.cpp)
   file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS ${ENGINE_INC_DIR}/${ENGINE_NAME}/*.hpp)
 
@@ -42,7 +35,7 @@ if(NOT TARGET ${ENGINE_NAME})
 
   find_package(OpenGL REQUIRED)
   target_link_libraries(${ENGINE_NAME}
-    PUBLIC
+    PRIVATE
     glad glfw OpenGL::GL 
     StarletMath StarletParsers StarletScene StarletGraphics StarletControls
   )
