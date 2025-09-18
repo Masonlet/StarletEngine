@@ -1,24 +1,25 @@
 cmake_minimum_required(VERSION 3.23)
 
 set(ENGINE_NAME StarletEngine)
-set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
-set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+set(ENGINE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(ENGINE_INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc")
+set(ENGINE_EXTERN  "${CMAKE_CURRENT_SOURCE_DIR}/external")
 
 project(${ENGINE_NAME} LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_SUPPRESS_REGENERATION ON)
 
-file(GLOB_RECURSE ENGINE_SRC     CONFIGURE_DEPENDS ${SRC_DIR}/*.cpp)
-file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS ${INC_DIR}/*.hpp)
+file(GLOB_RECURSE ENGINE_SRC     CONFIGURE_DEPENDS ${ENGINE_SRC_DIR}/*.cpp)
+file(GLOB_RECURSE ENGINE_HEADERS CONFIGURE_DEPENDS ${ENGINE_INC_DIR}/${ENGINE_NAME}/*.hpp)
 
 add_library(${ENGINE_NAME} STATIC)
 target_sources(${ENGINE_NAME} PUBLIC ${ENGINE_HEADERS} PRIVATE ${ENGINE_SRC})
-target_include_directories(${ENGINE_NAME} PUBLIC $<BUILD_INTERFACE:${INC_DIR}> $<INSTALL_INTERFACE:include>)
+target_include_directories(${ENGINE_NAME} PUBLIC $<BUILD_INTERFACE:${ENGINE_INC_DIR}> $<INSTALL_INTERFACE:include>)
 
 include(FetchContent)
-add_library(glad STATIC ${CMAKE_CURRENT_SOURCE_DIR}/external/src/glad/glad.c)
-target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/external/inc)
+add_library(glad STATIC ${ENGINE_EXTERN}/src/glad/glad.c)
+target_include_directories(glad PUBLIC ${ENGINE_EXTERN}/inc)
 set_target_properties(glad PROPERTIES FOLDER "External")
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
