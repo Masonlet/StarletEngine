@@ -34,7 +34,6 @@ FetchContent_Declare(StarletScene GIT_REPOSITORY https://github.com/masonlet/sta
 FetchContent_Declare(StarletGraphics GIT_REPOSITORY https://github.com/masonlet/starletgraphics.git GIT_TAG main)
 FetchContent_Declare(StarletControls GIT_REPOSITORY https://github.com/masonlet/starletcontrols.git GIT_TAG main)
 FetchContent_MakeAvailable(StarletMath StarletParsers StarletScene StarletGraphics StarletControls)
-target_link_libraries(StarletParsers PUBLIC glad)
 target_link_libraries(StarletGraphics PUBLIC glad)
 
 find_package(OpenGL REQUIRED)
