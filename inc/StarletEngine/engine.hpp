@@ -1,10 +1,10 @@
 #pragma once
 
-#include "renderer.hpp"
 #include "windowManager.hpp"
-#include "StarletGraphics/shaderManager.hpp"
-#include "StarletGraphics/meshManager.hpp"
-#include "StarletGraphics/textureManager.hpp"
+#include "StarletGraphics/renderer.hpp"
+#include "StarletGraphics/shader/shaderManager.hpp"
+#include "StarletGraphics/mesh/meshManager.hpp"
+#include "StarletGraphics/texture/textureManager.hpp"
 #include "StarletScene/sceneManager.hpp"
 #include "StarletControls/inputManager.hpp"
 #include "StarletControls/modelController.hpp"
