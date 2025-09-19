@@ -35,7 +35,7 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
 }
 void Engine::handleScrollEvents(double xOffset, double yOffset) {
   Camera* cam{ nullptr };
-  if (!sceneManager.scene.getObjectByIndex<Camera>(cameraController.current, cam)) return;
+  if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) return;
   cameraController.adjustFov(*cam, static_cast<float>(-yOffset));
 }
 

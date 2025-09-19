@@ -4,9 +4,9 @@
 bool Engine::loadScene(const std::string& sceneIn) {
   debugLog("Engine", "loadScene", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  if (sceneIn.empty() && !sceneManager.loadTxtScene(assetPath + "/scenes/EmptyScene.txt"))
+  if (sceneIn.empty() && !sceneManager.loadTxtScene("EmptyScene.txt"))
     return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
-  else if (!sceneManager.loadTxtScene(assetPath + "/scenes/" + sceneIn + ".txt"))
+  else if (!sceneManager.loadTxtScene(sceneIn + ".txt"))
     return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
 
   bool ok = true;
@@ -22,8 +22,8 @@ bool Engine::loadScene(const std::string& sceneIn) {
 bool Engine::loadSceneMeshes() {
   debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (const std::pair<const std::string, Model>& model : sceneManager.scene.getObjects<Model>())
-    if (!meshManager.addMesh(model.second.meshPath))
+  for (const std::pair<const std::string, Model>& model : sceneManager.getScene().getObjects<Model>())
+    if (!renderer.addMesh(model.second.meshPath))
       return error("Engine", "loadSceneMeshes", "Failed to load mesh: " + model.second.meshPath);
 
   return debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()), true);
@@ -33,22 +33,22 @@ bool Engine::loadSceneLighting() {
 
   if (renderer.getProgram() == 0) return error("Engine", "loadSceneLighting", "No active shader program set before loading lighting");
 
-  renderer.updateLightCount(sceneManager.scene.getObjectCount<Light>());
-  renderer.updateLightUniforms(sceneManager.scene.getObjects<Light>());
+  renderer.updateLightCount(sceneManager.getScene().getObjectCount<Light>());
+  renderer.updateLightUniforms(sceneManager.getScene().getObjects<Light>());
 
   return debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 bool Engine::loadSceneTextures() {
   debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (const std::pair<const std::string, TextureData>& data : sceneManager.scene.getObjects<TextureData>()) {
+  for (const std::pair<const std::string, TextureData>& data : sceneManager.getScene().getObjects<TextureData>()) {
     const TextureData& texture = data.second;
 
     if (!texture.isCube) {
-      if (!textureManager.addTexture(texture.name, texture.faces[0]))
+      if (!renderer.addTexture(texture.name, texture.faces[0]))
         return error("Engine", "loadSceneTextures", "Failed to load 2D texture: " + texture.name);
     }
-    else if (!textureManager.addCubeTexture(texture.name, texture.faces))
+    else if (!renderer.addTextureCube(texture.name, texture.faces))
       return error("Engine", "loadSceneTextures", "Failed to load cube map: " + texture.name);
   }
 
@@ -57,12 +57,12 @@ bool Engine::loadSceneTextures() {
 bool Engine::loadSceneTextureConnections() {
   debugLog("Engine", "loadSceneTextureConnections", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (const std::pair<const std::string, TextureConnection>& data : sceneManager.scene.getObjects<TextureConnection>()) {
+  for (const std::pair<const std::string, TextureConnection>& data : sceneManager.getScene().getObjects<TextureConnection>()) {
     const TextureConnection& connection = data.second;
     if (connection.slot >= Model::NUM_TEXTURES) return error("Engine", "loadSceneTextureConnection", "Slot out of range: " + std::to_string(connection.slot));
 
     Model* model;
-    if (!sceneManager.scene.getObjectByName<Model>(connection.modelName, model))
+    if (!sceneManager.getScene().getObjectByName<Model>(connection.modelName, model))
       return error("Engine", "loadSceneTextureConnection", "Model " + connection.modelName + " not found for connection " + connection.name);
 
     if (connection.textureName.empty() || connection.mix <= 0.0f) {
@@ -83,7 +83,7 @@ bool Engine::loadSceneTextureConnections() {
     }
 
     TextureData* texture;
-    if (!sceneManager.scene.getObjectByName<TextureData>(connection.textureName, texture))
+    if (!sceneManager.getScene().getObjectByName<TextureData>(connection.textureName, texture))
       return error("Engine", "loadSceneTextureConnection", "Texture " + connection.textureName + " not found for connection " + connection.name);
 
     model->useTextures = true;
@@ -95,25 +95,25 @@ bool Engine::loadSceneTextureConnections() {
 bool Engine::loadScenePrimitives() {
   debugLog("Engine", "loadScenePrimitives", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (std::pair<const std::string, Primitive>& data : sceneManager.scene.getObjects<Primitive>()) {
+  for (std::pair<const std::string, Primitive>& data : sceneManager.getScene().getObjects<Primitive>()) {
     const Primitive& primitive = data.second;
 
     bool ok = false;
     switch (primitive.type) {
     case PrimitiveType::Triangle:
-      ok = meshManager.createTriangle(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
+      ok = renderer.createTriangle(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
       break;
     case PrimitiveType::Square:
-      ok = meshManager.createSquare(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
+      ok = renderer.createSquare(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
       break;
     case PrimitiveType::Cube:
-      ok = meshManager.createCube(primitive.name, primitive.transform.size, primitive.colour);
+      ok = renderer.createCube(primitive.name, primitive.transform.size, primitive.colour);
       break;
     }
     if (!ok) return error("Engine", "loadScenePrimitives", "Failed to create primitive mesh: " + primitive.name);
 
     Mesh* primMesh;
-    if (!meshManager.getMesh(primitive.name, primMesh))
+    if (!renderer.getMesh(primitive.name, primMesh))
       return error("Engine", "loadScenePrimitives", "Failed to load primitive mesh: " + primitive.name);
 
     Model m{};
@@ -127,7 +127,7 @@ bool Engine::loadScenePrimitives() {
     }
     m.colour = primitive.colour;
     m.colourMode = primitive.colourMode;
-    if (!sceneManager.scene.addObject<Model>(m, primitive.name.c_str()))
+    if (!sceneManager.getScene().addObject<Model>(m, primitive.name.c_str()))
       return error("Engine", "loadScenePrimitives", "Failed to add primitive model: " + primitive.name);
   }
 
@@ -136,7 +136,7 @@ bool Engine::loadScenePrimitives() {
 bool Engine::loadSceneGrids() {
   debugLog("Engine", "loadSceneGrids", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (std::pair<const std::string, Grid>& data : sceneManager.scene.getObjects<Grid>()) {
+  for (std::pair<const std::string, Grid>& data : sceneManager.getScene().getObjects<Grid>()) {
     const Grid& grid = data.second;
 
     std::string sharedName = grid.name + (grid.type == GridType::Square ? "_sharedSquare" : "_sharedCube");
@@ -144,10 +144,10 @@ bool Engine::loadSceneGrids() {
     bool ok = false;
     switch (grid.type) {
     case GridType::Square:
-      ok = meshManager.createSquare(sharedName, { grid.transform.size.x, grid.transform.size.y }, grid.colour);
+      ok = renderer.createSquare(sharedName, { grid.transform.size.x, grid.transform.size.y }, grid.colour);
       break;
     case GridType::Cube:
-      ok = meshManager.createCube(sharedName, grid.transform.size, grid.colour);
+      ok = renderer.createCube(sharedName, grid.transform.size, grid.colour);
       break;
     }
 
@@ -184,7 +184,7 @@ bool Engine::loadSceneGrids() {
       m.transform.rot = grid.transform.rot;
       m.transform.size = grid.transform.size;
 
-      if (!sceneManager.scene.addObject<Model>(m, m.name.c_str()))
+      if (!sceneManager.getScene().addObject<Model>(m, m.name.c_str()))
         return error("Engine", "loadSceneGrids", "Failed to add grid instance model: " + m.name);
     }
   }

@@ -1,31 +1,30 @@
 #include "StarletEngine/engine.hpp"
 #include <GLFW/glfw3.h>
 
+void Engine::setAssetPaths(const std::string& path) {
+  renderer.setAssetPaths(path.c_str());
+  sceneManager.setBasePath((path + "/scenes/").c_str());
+}
+
 bool Engine::initialize(const unsigned int width, const unsigned int height, const char* title) {
   debugLog("Engine", "initialize", "Start time: " + std::to_string(glfwGetTime()), true);
 
   if (!windowManager.createWindow(width, height, title)) return false;
   windowManager.setWindowPointer(this);
 
-  setAssetPaths();
   if (!setupShaders()) return false;
   setupGLState();
 
   return debugLog("Engine", "initialize", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 
-void Engine::setAssetPaths() {
-  shaderManager.setBasePath(assetPath);
-  meshManager.setBasePath(assetPath);
-  textureManager.setBasePath(assetPath);
-}
 bool Engine::setupShaders() {
   debugLog("Engine", "setupShaders", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
+  if (!renderer.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
     return error("Engine", "setupShaders", "Failed to create shader program from file");
 
-  if (!renderer.setProgram(shaderManager.getProgramID("shader1")))
+  if (!renderer.setProgram(renderer.getProgramID("shader1")))
     return error("Engine", "setupShaders", "Failed to set program to shader1");
 
   return debugLog("Engine", "setupShaders", "Finish time: " + std::to_string(glfwGetTime()), true);

@@ -2,9 +2,6 @@
 
 #include "windowManager.hpp"
 #include "StarletGraphics/renderer.hpp"
-#include "StarletGraphics/shader/shaderManager.hpp"
-#include "StarletGraphics/mesh/meshManager.hpp"
-#include "StarletGraphics/texture/textureManager.hpp"
 #include "StarletScene/sceneManager.hpp"
 #include "StarletControls/inputManager.hpp"
 #include "StarletControls/modelController.hpp"
@@ -12,9 +9,7 @@
 
 class Engine {
 public:
-	inline void setAssetPath(const std::string& path) { assetPath = path; }
-	const std::string& getAssetPath() const { return assetPath; }
-
+	void setAssetPaths(const std::string& path);
 	bool initialize(const unsigned int width, const unsigned int height, const char* title);
 	bool loadScene(const std::string& sceneIn = "Default");
 	void run();
@@ -30,7 +25,6 @@ public:
 	void toggleWireframe();
 
 private:
-	std::string assetPath;
 	bool wireframe{ false };
 	float deltaTime{ 0.0f }, lastTime{ 0.0f };
 
@@ -38,15 +32,10 @@ private:
 	WindowManager windowManager;
 	SceneManager sceneManager;
 
-	ShaderManager shaderManager;
-	MeshManager meshManager;
-	TextureManager textureManager;
-
 	InputManager inputManager;
 	ModelController modelController;
 	FreeCameraController cameraController;
 
-	void setAssetPaths();
 	bool setupShaders();
 	void setupGLState();
 

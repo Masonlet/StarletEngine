@@ -4,7 +4,7 @@
 
 Camera* Engine::getActiveCamera() {
   Camera* cam{ nullptr };
-  if (!sceneManager.scene.getObjectByIndex<Camera>(cameraController.current, cam)) {
+  if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) {
     error("Engine", "getActiveCamera", "No active camera found for selected camera");
     return nullptr;
   }

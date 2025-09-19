@@ -17,16 +17,16 @@ void Engine::renderFrame() {
 void Engine::updateEngineState(Camera& cam) {
   cameraController.update(cam, inputManager, deltaTime);
   renderer.updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, windowManager.getAspect(), cam.nearPlane, cam.farPlane));
-  renderer.updateLightUniforms(sceneManager.scene.getObjects<Light>());
+  renderer.updateLightUniforms(sceneManager.getScene().getObjects<Light>());
 }
 
 void Engine::renderModels(const Vec3& eye) {
   std::vector<const Model*> transparentInstances;
-  for (const std::pair<const std::string, Model>& model : sceneManager.scene.getObjects<Model>()) {
+  for (const std::pair<const std::string, Model>& model : sceneManager.getScene().getObjects<Model>()) {
     const Model& instance = model.second;
     if (instance.name == "skybox") continue;
 
-    if (instance.colour.w >= 1.0f) renderer.drawModel(meshManager, textureManager, instance);
+    if (instance.colour.w >= 1.0f) renderer.drawModel(instance);
     else                           transparentInstances.push_back(&instance);
   }
 
@@ -46,10 +46,10 @@ void Engine::renderModels(const Vec3& eye) {
     }
   }
 
-  for (const Model* instance : transparentInstances) renderer.drawModel(meshManager, textureManager, *instance);
+  for (const Model* instance : transparentInstances) renderer.drawModel(*instance);
 }
 void Engine::renderSkybox(const Vec3& eye) {
   Model* skybox{ nullptr };
-  if (sceneManager.scene.getObjectByName(std::string("skybox"), skybox))
-    renderer.drawSkybox(meshManager, textureManager, *skybox, eye);
+  if (sceneManager.getScene().getObjectByName(std::string("skybox"), skybox))
+    renderer.drawSkybox(*skybox, eye);
 }
