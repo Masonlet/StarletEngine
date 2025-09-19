@@ -14,11 +14,21 @@ void Engine::renderFrame() {
   glBindVertexArray(0);
 }
 
+Camera* Engine::getActiveCamera() {
+  Camera* cam{ nullptr };
+  if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) {
+    error("Engine", "getActiveCamera", "No active camera found for selected camera");
+    return nullptr;
+  }
+  return cam;
+}
+
 void Engine::updateEngineState(Camera& cam) {
   cameraController.update(cam, inputManager, deltaTime);
   renderer.updateCameraUniforms(cam.pos, Mat4::lookAt(cam.pos, cam.front), Mat4::perspective(cam.fov, windowManager.getAspect(), cam.nearPlane, cam.farPlane));
   renderer.updateLightUniforms(sceneManager.getScene().getObjects<Light>());
 }
+
 
 void Engine::renderModels(const Vec3& eye) {
   std::vector<const Model*> transparentInstances;
@@ -48,6 +58,7 @@ void Engine::renderModels(const Vec3& eye) {
 
   for (const Model* instance : transparentInstances) renderer.drawModel(*instance);
 }
+
 void Engine::renderSkybox(const Vec3& eye) {
   Model* skybox{ nullptr };
   if (sceneManager.getScene().getObjectByName(std::string("skybox"), skybox))

@@ -19,26 +19,6 @@ void Engine::run() {
   }
 }
 
-void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
-  for (const KeyEvent event : keyEvents) {
-    if (event.action != GLFW_PRESS) continue;
-
-    switch (event.key) {
-    case GLFW_KEY_ESCAPE: windowManager.requestClose(); break;
-
-#ifndef NDEBUG
-    case GLFW_KEY_P: toggleWireframe();  break;
-    case GLFW_KEY_C: toggleCursorLock(); break;
-#endif
-    }
-  }
-}
-void Engine::handleScrollEvents(double xOffset, double yOffset) {
-  Camera* cam{ nullptr };
-  if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) return;
-  cameraController.adjustFov(*cam, static_cast<float>(-yOffset));
-}
-
 void Engine::updateTime(const float currentTime) {
   if (lastTime == 0.0f) {
     lastTime = currentTime;
@@ -57,4 +37,24 @@ void Engine::updateTime(const float currentTime) {
 
   lastTime = currentTime;
   deltaTime = smoothingFactor * deltaTime + (1.0f - smoothingFactor) * rawDelta;
+}
+
+void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
+  for (const KeyEvent event : keyEvents) {
+    if (event.action != GLFW_PRESS) continue;
+
+    switch (event.key) {
+    case GLFW_KEY_ESCAPE: windowManager.requestClose(); break;
+
+#ifndef NDEBUG
+    case GLFW_KEY_P: toggleWireframe();  break;
+    case GLFW_KEY_C: toggleCursorLock(); break;
+#endif
+    }
+  }
+}
+void Engine::handleScrollEvents(double xOffset, double yOffset) {
+  Camera* cam{ nullptr };
+  if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) return;
+  cameraController.adjustFov(*cam, static_cast<float>(-yOffset));
 }
