@@ -11,12 +11,4 @@ Camera* Engine::getActiveCamera() {
   return cam;
 }
 
-void Engine::toggleCursorLock() {
-  bool wasLocked = windowManager.switchCursorLock();
-  inputManager.setCursorLocked(!wasLocked);
-}
 
-void Engine::toggleWireframe() {
-  wireframe = !wireframe;
-  glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
-}

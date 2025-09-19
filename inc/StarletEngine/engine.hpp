@@ -21,11 +21,10 @@ public:
 	inline void onKey(const KeyEvent& event) { inputManager.onKey(event); }
 	inline void onScroll(double xOffset, double yOffset) { inputManager.onScroll(xOffset, yOffset); }
 
-	void toggleCursorLock();
-	void toggleWireframe();
+	inline void toggleCursorLock() { inputManager.setCursorLocked(windowManager.switchCursorLock()); }
+	inline void toggleWireframe() { renderer.toggleWireframe(); };
 
 private:
-	bool wireframe{ false };
 	float deltaTime{ 0.0f }, lastTime{ 0.0f };
 
 	Renderer renderer;

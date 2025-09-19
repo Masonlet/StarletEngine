@@ -60,11 +60,12 @@ bool Window::switchActiveWindowVisibility() {
 bool Window::switchCursorLock() {
 	if (!window)  return error("WindowManager", "switchCursorLock", "No active window to switch cursor lock.");
 
-	bool wasLocked = glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
-	glfwSetInputMode(window, GLFW_CURSOR, wasLocked ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	const bool locked = glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+	const bool newLock = !locked;
+	glfwSetInputMode(window, GLFW_CURSOR, newLock ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
-	debugLog("WindowManager", "toggleCursorLock", std::string("Cursor ") + (wasLocked ? "unlocked" : "locked"), true);
-	return wasLocked;
+	debugLog("WindowManager", "toggleCursorLock", std::string("Cursor ") + (newLock ? "locked" : "unlocked"), true);
+	return newLock;
 }
 
 
