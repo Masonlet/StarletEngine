@@ -22,12 +22,7 @@ void Engine::run() {
     }
 
     cameraController.update(*cam, inputManager, deltaTime);
-    renderer.renderFrame(*cam, windowManager.getAspect(), sceneManager.getScene().getObjects<Light>(), sceneManager.getScene().getObjects<Model>());
-
-    Model* skybox{ nullptr };
-    if (sceneManager.getScene().getObjectByName(std::string("skybox"), skybox))
-      renderer.drawSkybox(*skybox, cam->pos);
-
+    renderer.renderFrame(*cam, windowManager.getAspect(), sceneManager.getScene().getObjects<Light>(), sceneManager.getScene().getObjects<Model>(), *sceneManager.getScene().getObjectByName<Model>(std::string("skybox")));
     windowManager.swapBuffers();
   }
 }
