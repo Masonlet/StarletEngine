@@ -1,4 +1,4 @@
-#include <glad/glad.h> 
+
 #include <GLFW/glfw3.h>
 #include "StarletEngine/window.hpp"
 #include "StarletControls/inputManager.hpp"
@@ -38,7 +38,7 @@ void Window::setWindowPointer(void* userPointer) const {
 	if (window) glfwSetWindowUserPointer(window, userPointer);
 }
 void Window::setCurrentWindow() const {
-	if (window)  glfwMakeContextCurrent(window);
+	if (window) glfwMakeContextCurrent(window);
 }
 
 void Window::updateInput(InputManager& inputManager) {
@@ -51,14 +51,14 @@ void Window::updateViewport(const unsigned int widthIn, const unsigned int heigh
 }
 
 bool Window::switchActiveWindowVisibility() {
-	if (!window)  return error("WindowManager", "switchActiveWindowVisibility", "No active window to switch visibility.");
+	if (!window) return error("WindowManager", "switchActiveWindowVisibility", "No active window to switch visibility.");
 
 	glfwGetWindowAttrib(window, GLFW_VISIBLE) ? glfwHideWindow(window) : glfwShowWindow(window);
 
 	return glfwGetWindowAttrib(window, GLFW_VISIBLE);
 }
 bool Window::switchCursorLock() {
-	if (!window)  return error("WindowManager", "switchCursorLock", "No active window to switch cursor lock.");
+	if (!window) return error("WindowManager", "switchCursorLock", "No active window to switch cursor lock.");
 
 	const bool locked = glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 	const bool newLock = !locked;

@@ -38,6 +38,13 @@ private:
 	bool setupShaders();
 	void setupGLState();
 
+	bool loadSceneMeshes();
+	bool loadSceneLighting();
+	bool loadSceneTextures();
+	bool loadSceneTextureConnections();
+	bool loadScenePrimitives();
+	bool loadSceneGrids();
+
 	void updateTime(const float currentTime);
 	void updateEngineState(Camera& cam);
 
@@ -45,13 +52,4 @@ private:
 	void handleScrollEvents(double xOffset, double yOffset);
 
 	void renderFrame();
-	void renderModels(const Vec3& eye);
-	void renderSkybox(const Vec3& eye);
-
-	bool loadSceneMeshes();
-	bool loadSceneLighting();
-	bool loadSceneTextures();
-	bool loadSceneTextureConnections();
-	bool loadScenePrimitives();
-	bool loadSceneGrids();
 };

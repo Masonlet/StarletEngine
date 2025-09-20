@@ -87,7 +87,6 @@ bool Engine::loadScenePrimitives() {
 
   for (std::pair<const std::string, Primitive>& data : sceneManager.getScene().getObjects<Primitive>()) {
     const Primitive& primitive = data.second;
-
     if (!renderer.createPrimitiveMesh(primitive))
       return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive.name);
 
@@ -117,18 +116,10 @@ bool Engine::loadSceneGrids() {
 
   for (std::pair<const std::string, Grid>& data : sceneManager.getScene().getObjects<Grid>()) {
     const Grid& grid = data.second;
-
     std::string sharedName = grid.name + (grid.type == GridType::Square ? "_sharedSquare" : "_sharedCube");
 
-    bool ok = false;
-    switch (grid.type) {
-    case GridType::Square:
-      ok = renderer.createSquare(sharedName, { grid.transform.size.x, grid.transform.size.y }, grid.colour);
-      break;
-    case GridType::Cube:
-      ok = renderer.createCube(sharedName, grid.transform.size, grid.colour);
-      break;
-    }
+    if (!renderer.createGridMesh(grid, sharedName))
+      return error("Engine", "loadSceneGrids", "Failed to create mesh for: " + sharedName);
 
     const int gridSide = (grid.count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid.count)))) : 0;
     for (int i = 0; i < 0 + grid.count; ++i) {
