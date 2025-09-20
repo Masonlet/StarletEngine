@@ -9,50 +9,40 @@ bool Engine::loadScene(const std::string& sceneIn) {
   else if (!sceneManager.loadTxtScene(sceneIn + ".txt"))
     return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
 
+  if (renderer.getProgram() == 0) return error("Engine", "loadScene", "No active shader program set after loading scene");
+
   bool ok = true;
+
   ok &= loadSceneMeshes();
   ok &= loadSceneLighting();
   ok &= loadSceneTextures();
   ok &= loadSceneTextureConnections();
   ok &= loadScenePrimitives();
   ok &= loadSceneGrids();
-  return ok ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()), true) : false;
+
+  return ok
+    ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()), true)
+    : error("Engine", "loadScene", "Failed to load scene: " + sceneIn);;
 }
 
 bool Engine::loadSceneMeshes() {
   debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (const std::pair<const std::string, Model>& model : sceneManager.getScene().getObjects<Model>())
-    if (!renderer.addMesh(model.second.meshPath))
-      return error("Engine", "loadSceneMeshes", "Failed to load mesh: " + model.second.meshPath);
-
-  return debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()), true);
+  return renderer.addMeshes(sceneManager.getScene().getObjects<Model>()) 
+    ? debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()), true) 
+    : error("Engine", "loadSceneMeshes", "Failed to load meshes");
 }
 bool Engine::loadSceneLighting() {
   debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()), true);
-
-  if (renderer.getProgram() == 0) return error("Engine", "loadSceneLighting", "No active shader program set before loading lighting");
-
   renderer.updateLightCount(sceneManager.getScene().getObjectCount<Light>());
   renderer.updateLightUniforms(sceneManager.getScene().getObjects<Light>());
-
   return debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 bool Engine::loadSceneTextures() {
   debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()), true);
-
-  for (const std::pair<const std::string, TextureData>& data : sceneManager.getScene().getObjects<TextureData>()) {
-    const TextureData& texture = data.second;
-
-    if (!texture.isCube) {
-      if (!renderer.addTexture(texture.name, texture.faces[0]))
-        return error("Engine", "loadSceneTextures", "Failed to load 2D texture: " + texture.name);
-    }
-    else if (!renderer.addTextureCube(texture.name, texture.faces))
-      return error("Engine", "loadSceneTextures", "Failed to load cube map: " + texture.name);
-  }
-
-  return debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()), true);
+  return renderer.addTextures(sceneManager.getScene().getObjects<TextureData>()) 
+    ? debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()), true)
+    : error("Engine", "loadSceneTextures", "Failed to load scene textures");
 }
 bool Engine::loadSceneTextureConnections() {
   debugLog("Engine", "loadSceneTextureConnections", "Start time: " + std::to_string(glfwGetTime()), true);
@@ -98,19 +88,8 @@ bool Engine::loadScenePrimitives() {
   for (std::pair<const std::string, Primitive>& data : sceneManager.getScene().getObjects<Primitive>()) {
     const Primitive& primitive = data.second;
 
-    bool ok = false;
-    switch (primitive.type) {
-    case PrimitiveType::Triangle:
-      ok = renderer.createTriangle(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
-      break;
-    case PrimitiveType::Square:
-      ok = renderer.createSquare(primitive.name, { primitive.transform.size.x, primitive.transform.size.y }, primitive.colour);
-      break;
-    case PrimitiveType::Cube:
-      ok = renderer.createCube(primitive.name, primitive.transform.size, primitive.colour);
-      break;
-    }
-    if (!ok) return error("Engine", "loadScenePrimitives", "Failed to create primitive mesh: " + primitive.name);
+    if (!renderer.createPrimitiveMesh(primitive))
+      return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive.name);
 
     Mesh* primMesh;
     if (!renderer.getMesh(primitive.name, primMesh))

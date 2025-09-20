@@ -48,7 +48,6 @@ private:
 	void renderModels(const Vec3& eye);
 	void renderSkybox(const Vec3& eye);
 
-	// To be moved.. maybe?
 	bool loadSceneMeshes();
 	bool loadSceneLighting();
 	bool loadSceneTextures();
