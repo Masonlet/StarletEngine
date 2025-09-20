@@ -46,10 +46,7 @@ private:
 	bool loadSceneGrids();
 
 	void updateTime(const float currentTime);
-	void updateEngineState(Camera& cam);
 
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
 	void handleScrollEvents(double xOffset, double yOffset);
-
-	void renderFrame();
 };

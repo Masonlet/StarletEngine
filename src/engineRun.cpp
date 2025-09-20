@@ -15,7 +15,19 @@ void Engine::run() {
     handleKeyEvents(inputManager.consumeKeyEvents());
     handleScrollEvents(inputManager.consumeScrollX(), inputManager.consumeScrollY());
 
-    renderFrame();
+    Camera* cam{ getActiveCamera() };
+    if (!cam) {
+      error("Engine", "renderFrame", "No active camera while rendering!");
+      return;
+    }
+
+    cameraController.update(*cam, inputManager, deltaTime);
+    renderer.renderFrame(*cam, windowManager.getAspect(), sceneManager.getScene().getObjects<Light>(), sceneManager.getScene().getObjects<Model>());
+
+    Model* skybox{ nullptr };
+    if (sceneManager.getScene().getObjectByName(std::string("skybox"), skybox))
+      renderer.drawSkybox(*skybox, cam->pos);
+
     windowManager.swapBuffers();
   }
 }
@@ -54,28 +66,6 @@ void Engine::handleScrollEvents(double xOffset, double yOffset) {
   Camera* cam{ nullptr };
   if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) return;
   cameraController.adjustFov(*cam, static_cast<float>(-yOffset));
-}
-
-void Engine::renderFrame() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  Camera* cam{ getActiveCamera() };
-  if (!cam) {
-    error("Engine", "renderFrame", "No active camera while rendering!");
-    return;
-  }
-
-  cameraController.update(*cam, inputManager, deltaTime);
-  renderer.updateCameraUniforms(cam->pos, Mat4::lookAt(cam->pos, cam->front), Mat4::perspective(cam->fov, windowManager.getAspect(), cam->nearPlane, cam->farPlane));
-
-  renderer.updateLightUniforms(sceneManager.getScene().getObjects<Light>());
-  renderer.drawModels(sceneManager.getScene().getObjects<Model>(), cam->pos);
-
-  Model* skybox{ nullptr };
-  if (sceneManager.getScene().getObjectByName(std::string("skybox"), skybox))
-    renderer.drawSkybox(*skybox, cam->pos);
-
-  glBindVertexArray(0);
 }
 
 Camera* Engine::getActiveCamera() {
