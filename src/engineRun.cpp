@@ -60,17 +60,16 @@ void Engine::renderFrame() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   Camera* cam{ getActiveCamera() };
-  if (!cam) return;
+  if (!cam) {
+    error("Engine", "renderFrame", "No active camera while rendering!");
+    return;
+  }
 
   cameraController.update(*cam, inputManager, deltaTime);
-
-  const std::map<std::string, Light>& lights = sceneManager.getScene().getObjects<Light>();
-  const std::map<std::string, Model>& models = sceneManager.getScene().getObjects<Model>();
-
   renderer.updateCameraUniforms(cam->pos, Mat4::lookAt(cam->pos, cam->front), Mat4::perspective(cam->fov, windowManager.getAspect(), cam->nearPlane, cam->farPlane));
-  renderer.updateLightUniforms(lights);
 
-  renderer.drawModels(models, cam->pos);
+  renderer.updateLightUniforms(sceneManager.getScene().getObjects<Light>());
+  renderer.drawModels(sceneManager.getScene().getObjects<Model>(), cam->pos);
 
   Model* skybox{ nullptr };
   if (sceneManager.getScene().getObjectByName(std::string("skybox"), skybox))

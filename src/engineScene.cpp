@@ -90,7 +90,7 @@ bool Engine::loadScenePrimitives() {
     if (!renderer.createPrimitiveMesh(primitive))
       return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive.name);
 
-    Mesh* primMesh;
+    MeshGPU* primMesh;
     if (!renderer.getMesh(primitive.name, primMesh))
       return error("Engine", "loadScenePrimitives", "Failed to load primitive mesh: " + primitive.name);
 
