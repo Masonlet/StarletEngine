@@ -127,7 +127,7 @@ bool Engine::loadSceneGrids() {
       const int row = (gridSide > 0) ? (localIdx / gridSide) : 0;
       const int col = (gridSide > 0) ? (localIdx % gridSide) : 0;
 
-      Vec3 pos{};
+      Vec3<float> pos{};
       if (grid.type == GridType::Square) {
         pos = { grid.spacing * static_cast<float>(col),
                 grid.spacing * static_cast<float>(row),
