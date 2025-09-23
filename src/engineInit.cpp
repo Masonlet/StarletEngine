@@ -28,6 +28,9 @@ bool Engine::setupShaders() {
   if (!renderer.setProgram(renderer.getProgramID("shader1")))
     return error("Engine", "setupShaders", "Failed to set program to shader1");
 
+  if(!renderer.cacheUniformLocations())
+		return error("Engine", "setupShaders", "Failed to cache uniform locations");
+
   return debugLog("Engine", "setupShaders", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 void Engine::setupGLState() {

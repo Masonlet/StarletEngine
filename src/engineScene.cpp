@@ -15,6 +15,7 @@ bool Engine::loadScene(const std::string& sceneIn) {
 
   if (sceneIn.empty() && !sceneManager.loadTxtScene("EmptyScene.txt"))
     return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
+
   else if (!sceneManager.loadTxtScene(sceneIn + ".txt"))
     return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
 
@@ -22,9 +23,18 @@ bool Engine::loadScene(const std::string& sceneIn) {
 
   bool ok = true;
 
-  ok &= loadSceneMeshes();
-  ok &= loadSceneLighting();
-  ok &= loadSceneTextures();
+  debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()), true);
+  ok &= renderer.addMeshes(sceneManager.getScene().getComponentsOfType<Model>());
+  debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()), true);
+
+  debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()), true);
+  renderer.updateLightUniforms(sceneManager.getScene().getComponentsOfType<Light>());
+  debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()), true);
+
+  debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()), true);
+  ok &= renderer.addTextures(sceneManager.getScene().getComponentsOfType<TextureData>());
+  debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()), true);
+
   ok &= loadSceneTextureConnections();
   ok &= loadScenePrimitives();
   ok &= loadSceneGrids();
@@ -34,24 +44,6 @@ bool Engine::loadScene(const std::string& sceneIn) {
     : error("Engine", "loadScene", "Failed to load scene: " + sceneIn);;
 }
 
-bool Engine::loadSceneMeshes() {
-  debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()), true);
-
-  return renderer.addMeshes(sceneManager.getScene().getComponentsOfType<Model>()) 
-    ? debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()), true) 
-    : error("Engine", "loadSceneMeshes", "Failed to load meshes");
-}
-bool Engine::loadSceneLighting() {
-  debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()), true);
-  renderer.updateLightUniforms(sceneManager.getScene().getComponentsOfType<Light>());
-  return debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()), true);
-}
-bool Engine::loadSceneTextures() {
-  debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()), true);
-  return renderer.addTextures(sceneManager.getScene().getComponentsOfType<TextureData>())
-    ? debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()), true)
-    : error("Engine", "loadSceneTextures", "Failed to load scene textures");
-}
 bool Engine::loadSceneTextureConnections() {
   debugLog("Engine", "loadSceneTextureConnections", "Start time: " + std::to_string(glfwGetTime()), true);
 
