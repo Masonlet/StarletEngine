@@ -1,6 +1,8 @@
-#include <GLFW/glfw3.h>
 #include "StarletEngine/callbacks.hpp"
+
 #include "StarletEngine/engine.hpp"
+
+#include <GLFW/glfw3.h>
 #include <stdio.h>
 
 void error_callback(const int error, const char* description) {

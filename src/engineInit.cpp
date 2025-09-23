@@ -1,4 +1,5 @@
 #include "StarletEngine/engine.hpp"
+
 #include <GLFW/glfw3.h>
 
 void Engine::setAssetPaths(const std::string& path) {

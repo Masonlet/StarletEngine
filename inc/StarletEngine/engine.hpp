@@ -27,8 +27,8 @@ public:
 private:
 	float deltaTime{ 0.0f }, lastTime{ 0.0f };
 
-	Renderer renderer;
 	WindowManager windowManager;
+	Renderer renderer;
 	SceneManager sceneManager;
 
 	InputManager inputManager;

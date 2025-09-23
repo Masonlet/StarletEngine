@@ -1,8 +1,9 @@
-
-#include <GLFW/glfw3.h>
 #include "StarletEngine/window.hpp"
+
 #include "StarletControls/inputManager.hpp"
 #include "StarletParsers/utils/log.hpp"
+
+#include <GLFW/glfw3.h>
 #include <cstdio>
 
 Window::~Window() {

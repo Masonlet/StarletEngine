@@ -1,8 +1,11 @@
+#include "StarletEngine/windowManager.hpp"
+
+#include "StarletEngine/callbacks.hpp"
+
+#include "StarletParsers/utils/log.hpp"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "StarletEngine/windowManager.hpp"
-#include "StarletEngine/callbacks.hpp"
-#include "StarletParsers/utils/log.hpp"
 #include <cstdio>
 
 constexpr int GL_MAJOR{ 3 };
