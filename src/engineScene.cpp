@@ -28,36 +28,34 @@ bool Engine::loadScene(const std::string& sceneIn) {
 bool Engine::loadSceneMeshes() {
   debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  return renderer.addMeshes(sceneManager.getScene().getObjects<Model>()) 
+  return renderer.addMeshes(sceneManager.getScene().getComponentsOfType<Model>()) 
     ? debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()), true) 
     : error("Engine", "loadSceneMeshes", "Failed to load meshes");
 }
 bool Engine::loadSceneLighting() {
   debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()), true);
-  renderer.updateLightCount(sceneManager.getScene().getObjectCount<Light>());
-  renderer.updateLightUniforms(sceneManager.getScene().getObjects<Light>());
+  renderer.updateLightUniforms(sceneManager.getScene().getComponentsOfType<Light>());
   return debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 bool Engine::loadSceneTextures() {
   debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()), true);
-  return renderer.addTextures(sceneManager.getScene().getObjects<TextureData>()) 
+  return renderer.addTextures(sceneManager.getScene().getComponentsOfType<TextureData>())
     ? debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()), true)
     : error("Engine", "loadSceneTextures", "Failed to load scene textures");
 }
 bool Engine::loadSceneTextureConnections() {
   debugLog("Engine", "loadSceneTextureConnections", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (const std::pair<const std::string, TextureConnection>& data : sceneManager.getScene().getObjects<TextureConnection>()) {
-    const TextureConnection& connection = data.second;
-    if (connection.slot >= Model::NUM_TEXTURES) return error("Engine", "loadSceneTextureConnection", "Slot out of range: " + std::to_string(connection.slot));
+  for (const TextureConnection* connection : sceneManager.getScene().getComponentsOfType<TextureConnection>()) {
+    if (connection->slot >= Model::NUM_TEXTURES) 
+      return error("Engine", "loadSceneTextureConnection", "Slot out of range: " + std::to_string(connection->slot));
 
-    Model* model;
-    if (!sceneManager.getScene().getObjectByName<Model>(connection.modelName, model))
-      return error("Engine", "loadSceneTextureConnection", "Model " + connection.modelName + " not found for connection " + connection.name);
+    Model* model { sceneManager.getScene().getComponentByName<Model>(connection->modelName) };
+    if (!model) return error("Engine", "loadSceneTextureConnection", "Model " + connection->modelName + " not found for connection " + connection->name);
 
-    if (connection.textureName.empty() || connection.mix <= 0.0f) {
-      model->textureNames[connection.slot].clear();
-      model->textureMixRatio[connection.slot] = 0.0f;
+    if (connection->textureName.empty() || connection->mix <= 0.0f) {
+      model->textureNames[connection->slot].clear();
+      model->textureMixRatio[connection->slot] = 0.0f;
 
       bool any = false;
       for (unsigned int i = 0; i < Model::NUM_TEXTURES; ++i) {
@@ -68,45 +66,44 @@ bool Engine::loadSceneTextureConnections() {
       }
 
       model->useTextures = any;
-      debugLog("Scene", "loadSceneTextureConnections", "unbind: " + connection.modelName + "[slot " + std::to_string(connection.slot) + "]", true);
+      debugLog("Scene", "loadSceneTextureConnections", "unbind: " + connection->modelName + "[slot " + std::to_string(connection->slot) + "]", true);
       continue;
     }
 
-    TextureData* texture;
-    if (!sceneManager.getScene().getObjectByName<TextureData>(connection.textureName, texture))
-      return error("Engine", "loadSceneTextureConnection", "Texture " + connection.textureName + " not found for connection " + connection.name);
+    TextureData* texture { sceneManager.getScene().getComponentByName<TextureData>(connection->textureName) };
+    if (!texture) return error("Engine", "loadSceneTextureConnection", "Texture " + connection->textureName + " not found for connection " + connection->name);
 
     model->useTextures = true;
-    model->textureNames[connection.slot] = connection.textureName;
-    model->textureMixRatio[connection.slot] = (connection.mix < 0.0f) ? 0.0f : (connection.mix > 1.0f ? 1.0f : connection.mix);
+    model->textureNames[connection->slot] = connection->textureName;
+    model->textureMixRatio[connection->slot] = (connection->mix < 0.0f) ? 0.0f : (connection->mix > 1.0f ? 1.0f : connection->mix);
   }
   return debugLog("Engine", "loadSceneTextureConnections", "Finish time: " + std::to_string(glfwGetTime()), true);
 }
 bool Engine::loadScenePrimitives() {
   debugLog("Engine", "loadScenePrimitives", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (std::pair<const std::string, Primitive>& data : sceneManager.getScene().getObjects<Primitive>()) {
-    const Primitive& primitive = data.second;
-    if (!renderer.createPrimitiveMesh(primitive))
-      return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive.name);
+  for (Primitive* primitive : sceneManager.getScene().getComponentsOfType<Primitive>()) {
+    if (!renderer.createPrimitiveMesh(*primitive))
+      return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive->name);
 
     MeshGPU* primMesh;
-    if (!renderer.getMesh(primitive.name, primMesh))
-      return error("Engine", "loadScenePrimitives", "Failed to load primitive mesh: " + primitive.name);
+    if (!renderer.getMesh(primitive->name, primMesh))
+      return error("Engine", "loadScenePrimitives", "Failed to load primitive mesh: " + primitive->name);
 
-    Model m{};
-    m.name = primitive.name;
-    m.meshPath = primitive.name;
-    m.transform = primitive.transform;
-    m.useTextures = false;
+    StarEntity e = sceneManager.getScene().createEntity();
+    Model* model = sceneManager.getScene().addComponent<Model>(e);
+    if (!model) return error("Engine", "loadScenePrimitives", "Failed to create model component for primitive: " + primitive->name);
+
+    model->name = primitive->name;
+    model->meshPath = primitive->name;
+    model->transform = primitive->transform;
+    model->useTextures = false;
     for (unsigned i = 0; i < Model::NUM_TEXTURES; ++i) {
-      m.textureNames[i].clear();
-      m.textureMixRatio[i] = 0.0f;
+      model->textureNames[i].clear();
+      model->textureMixRatio[i] = 0.0f;
     }
-    m.colour = primitive.colour;
-    m.colourMode = primitive.colourMode;
-    if (!sceneManager.getScene().addObject<Model>(m, primitive.name.c_str()))
-      return error("Engine", "loadScenePrimitives", "Failed to add primitive model: " + primitive.name);
+    model->colour = primitive->colour;
+    model->colourMode = primitive->colourMode;
   }
 
   return debugLog("Engine", "loadScenePrimitives", "Finish time: " + std::to_string(glfwGetTime()), true);
@@ -114,48 +111,47 @@ bool Engine::loadScenePrimitives() {
 bool Engine::loadSceneGrids() {
   debugLog("Engine", "loadSceneGrids", "Start time: " + std::to_string(glfwGetTime()), true);
 
-  for (std::pair<const std::string, Grid>& data : sceneManager.getScene().getObjects<Grid>()) {
-    const Grid& grid = data.second;
-    std::string sharedName = grid.name + (grid.type == GridType::Square ? "_sharedSquare" : "_sharedCube");
+  for (const Grid* grid : sceneManager.getScene().getComponentsOfType<Grid>()) {
+    std::string sharedName = grid->name + (grid->type == GridType::Square ? "_sharedSquare" : "_sharedCube");
 
-    if (!renderer.createGridMesh(grid, sharedName))
+    if (!renderer.createGridMesh(*grid, sharedName))
       return error("Engine", "loadSceneGrids", "Failed to create mesh for: " + sharedName);
 
-    const int gridSide = (grid.count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid.count)))) : 0;
-    for (int i = 0; i < 0 + grid.count; ++i) {
+    const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
+    for (int i = 0; i < 0 + grid->count; ++i) {
       const int localIdx = i - 0;
       const int row = (gridSide > 0) ? (localIdx / gridSide) : 0;
       const int col = (gridSide > 0) ? (localIdx % gridSide) : 0;
 
       Vec3<float> pos{};
-      if (grid.type == GridType::Square) {
-        pos = { grid.spacing * static_cast<float>(col),
-                grid.spacing * static_cast<float>(row),
+      if (grid->type == GridType::Square) {
+        pos = { grid->spacing * static_cast<float>(col),
+                grid->spacing * static_cast<float>(row),
                 0.0f };
       }
       else {
-        pos = { grid.spacing * static_cast<float>(col),
+        pos = { grid->spacing * static_cast<float>(col),
                 0.0f,
-                grid.spacing * static_cast<float>(row) };
+                grid->spacing * static_cast<float>(row) };
       }
 
-      Model m{};
-      m.name = grid.name + "_instance_" + std::to_string(i);
-      m.meshPath = sharedName;
-      m.useTextures = false;
+      StarEntity e = sceneManager.getScene().createEntity();
+      Model* model = sceneManager.getScene().addComponent<Model>(e);
+      if (!model) return error("Engine", "loadSceneGrids", "Failed to add grid instance model: " + sharedName);
+
+      model->name = grid->name + "_instance_" + std::to_string(i);
+      model->meshPath = sharedName;
+      model->useTextures = false;
       for (unsigned ti = 0; ti < Model::NUM_TEXTURES; ++ti) {
-        m.textureNames[ti].clear();
-        m.textureMixRatio[ti] = 0.0f;
+        model->textureNames[ti].clear();
+        model->textureMixRatio[ti] = 0.0f;
       }
-      m.colour = grid.colour;
-      m.colourMode = grid.colourMode;
+      model->colour = grid->colour;
+      model->colourMode = grid->colourMode;
 
-      m.transform.pos = { pos, 1.0f };
-      m.transform.rot = grid.transform.rot;
-      m.transform.size = grid.transform.size;
-
-      if (!sceneManager.getScene().addObject<Model>(m, m.name.c_str()))
-        return error("Engine", "loadSceneGrids", "Failed to add grid instance model: " + m.name);
+      model->transform.pos = { pos, 1.0f };
+      model->transform.rot = grid->transform.rot;
+      model->transform.size = grid->transform.size;
     }
   }
 

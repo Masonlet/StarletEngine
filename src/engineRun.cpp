@@ -21,8 +21,9 @@ void Engine::run() {
       return;
     }
 
+		Scene& scene{ sceneManager.getScene() };
     cameraController.update(*cam, inputManager, deltaTime);
-    renderer.renderFrame(*cam, windowManager.getAspect(), sceneManager.getScene().getObjects<Light>(), sceneManager.getScene().getObjects<Model>(), *sceneManager.getScene().getObjectByName<Model>(std::string("skybox")));
+    renderer.renderFrame(*cam, windowManager.getAspect(), scene.getComponentsOfType<Light>(), scene.getComponentsOfType<Model>(), *sceneManager.getScene().getComponentByName<Model>(std::string("skybox")));
     windowManager.swapBuffers();
   }
 }
@@ -58,14 +59,14 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
   }
 }
 void Engine::handleScrollEvents(double xOffset, double yOffset) {
-  Camera* cam{ nullptr };
-  if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) return;
+  Camera* cam{ sceneManager.getScene().getComponentByIndex<Camera>(cameraController.current) };
+  if (!cam) return;
   cameraController.adjustFov(*cam, static_cast<float>(-yOffset));
 }
 
 Camera* Engine::getActiveCamera() {
-  Camera* cam{ nullptr };
-  if (!sceneManager.getScene().getObjectByIndex<Camera>(cameraController.current, cam)) {
+  Camera* cam{ sceneManager.getScene().getComponentByIndex<Camera>(cameraController.current) };
+  if (!cam) {
     error("Engine", "getActiveCamera", "No active camera found for selected camera");
     return nullptr;
   }
