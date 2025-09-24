@@ -13,9 +13,10 @@
 bool Engine::loadScene(const std::string& sceneIn) {
   debugLog("Engine", "loadScene", "Start time: " + std::to_string(glfwGetTime()));
 
-  if (sceneIn.empty() && !sceneManager.loadTxtScene("EmptyScene.txt"))
-    return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
-
+  if (sceneIn.empty()) {
+    if (!sceneManager.loadTxtScene("EmptyScene.txt"))
+      return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
+  }
   else if (!sceneManager.loadTxtScene(sceneIn + ".txt"))
     return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "windowManager.hpp"
+#include "timer.hpp"
 #include "StarletGraphics/renderer.hpp"
 #include "StarletScene/sceneManager.hpp"
 #include "StarletControls/inputManager.hpp"
@@ -25,8 +26,6 @@ public:
 	inline void toggleWireframe() { renderer.toggleWireframe(); };
 
 private:
-	float deltaTime{ 0.0f }, lastTime{ 0.0f };
-
 	WindowManager windowManager;
 	Renderer renderer;
 	SceneManager sceneManager;
@@ -35,13 +34,13 @@ private:
 	ModelController modelController;
 	FreeCameraController cameraController;
 
+	Timer timer;
+
 	bool setupShaders();
 
 	bool loadSceneTextureConnections();
 	bool loadScenePrimitives();
 	bool loadSceneGrids();
-
-	void updateTime(const float currentTime);
 
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
 };

@@ -17,8 +17,8 @@ void Engine::run() {
   windowManager.switchActiveWindowVisibility();
 
   while (!windowManager.shouldClose()) {
-    updateTime(static_cast<float>(glfwGetTime()));
-
+    float deltaTime = timer.tick();
+ 
     inputManager.clear();
     windowManager.pollEvents();
     windowManager.updateInput(inputManager);
@@ -38,22 +38,6 @@ void Engine::run() {
 
     windowManager.swapBuffers();
   }
-}
-
-void Engine::updateTime(const float currentTime) {
-  if (lastTime == 0.0f) {
-    lastTime = currentTime;
-    deltaTime = 0.0f;
-    return;
-  }
-
-  float rawDelta = currentTime - lastTime;
-  constexpr float maxDelta = 0.1f;
-
-  lastTime = currentTime;
-  deltaTime = (rawDelta > maxDelta) ? maxDelta : rawDelta;
-
-  if (rawDelta > maxDelta) debugLog("Engine", "Tick", "deltaTime clamped to " + std::to_string(maxDelta) + " (was " + std::to_string(rawDelta) + ")");
 }
 
 void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
