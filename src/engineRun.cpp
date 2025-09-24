@@ -22,18 +22,20 @@ void Engine::run() {
     inputManager.clear();
     windowManager.pollEvents();
     windowManager.updateInput(inputManager);
-    handleKeyEvents(inputManager.consumeKeyEvents());
-    handleScrollEvents(inputManager.consumeScrollX(), inputManager.consumeScrollY());
 
+    handleKeyEvents(inputManager.consumeKeyEvents());
+   
     Camera* cam{ getActiveCamera() };
     if (!cam) {
       error("Engine", "renderFrame", "No active camera while rendering!");
       return;
     }
+    cameraController.update(*cam, inputManager, deltaTime);
+    cameraController.adjustFov(*cam, static_cast<float>(-inputManager.consumeScrollY()));
 
 		Scene& scene{ sceneManager.getScene() };
-    cameraController.update(*cam, inputManager, deltaTime);
-    renderer.renderFrame(*cam, windowManager.getAspect(), scene.getComponentsOfType<Light>(), scene.getComponentsOfType<Model>(), *sceneManager.getScene().getComponentByName<Model>(std::string("skybox")));
+    renderer.renderFrame(*cam, windowManager.getAspect(), scene.getComponentsOfType<Light>(), scene.getComponentsOfType<Model>(), *scene.getComponentByName<Model>(std::string("skybox")));
+
     windowManager.swapBuffers();
   }
 }
@@ -51,7 +53,7 @@ void Engine::updateTime(const float currentTime) {
   lastTime = currentTime;
   deltaTime = (rawDelta > maxDelta) ? maxDelta : rawDelta;
 
-  if (rawDelta > maxDelta) debugLog("Engine", "Tick", "deltaTime clamped to " + std::to_string(maxDelta) + " (was " + std::to_string(rawDelta) + ")", true);
+  if (rawDelta > maxDelta) debugLog("Engine", "Tick", "deltaTime clamped to " + std::to_string(maxDelta) + " (was " + std::to_string(rawDelta) + ")");
 }
 
 void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
@@ -67,11 +69,6 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
 #endif
     }
   }
-}
-void Engine::handleScrollEvents(double xOffset, double yOffset) {
-  Camera* cam{ sceneManager.getScene().getComponentByIndex<Camera>(cameraController.current) };
-  if (!cam) return;
-  cameraController.adjustFov(*cam, static_cast<float>(-yOffset));
 }
 
 Camera* Engine::getActiveCamera() {

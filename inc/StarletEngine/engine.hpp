@@ -36,11 +36,7 @@ private:
 	FreeCameraController cameraController;
 
 	bool setupShaders();
-	void setupGLState();
 
-	bool loadSceneMeshes();
-	bool loadSceneLighting();
-	bool loadSceneTextures();
 	bool loadSceneTextureConnections();
 	bool loadScenePrimitives();
 	bool loadSceneGrids();
@@ -48,5 +44,4 @@ private:
 	void updateTime(const float currentTime);
 
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
-	void handleScrollEvents(double xOffset, double yOffset);
 };

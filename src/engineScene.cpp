@@ -11,7 +11,7 @@
 #include <GLFW/glfw3.h>
 
 bool Engine::loadScene(const std::string& sceneIn) {
-  debugLog("Engine", "loadScene", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadScene", "Start time: " + std::to_string(glfwGetTime()));
 
   if (sceneIn.empty() && !sceneManager.loadTxtScene("EmptyScene.txt"))
     return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
@@ -23,29 +23,29 @@ bool Engine::loadScene(const std::string& sceneIn) {
 
   bool ok = true;
 
-  debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()));
   ok &= renderer.addMeshes(sceneManager.getScene().getComponentsOfType<Model>());
-  debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()));
 
-  debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()));
   renderer.updateLightUniforms(sceneManager.getScene().getComponentsOfType<Light>());
-  debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()));
 
-  debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()));
   ok &= renderer.addTextures(sceneManager.getScene().getComponentsOfType<TextureData>());
-  debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()));
 
   ok &= loadSceneTextureConnections();
   ok &= loadScenePrimitives();
   ok &= loadSceneGrids();
 
   return ok
-    ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()), true)
+    ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()))
     : error("Engine", "loadScene", "Failed to load scene: " + sceneIn);;
 }
 
 bool Engine::loadSceneTextureConnections() {
-  debugLog("Engine", "loadSceneTextureConnections", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneTextureConnections", "Start time: " + std::to_string(glfwGetTime()));
 
   for (const TextureConnection* connection : sceneManager.getScene().getComponentsOfType<TextureConnection>()) {
     if (connection->slot >= Model::NUM_TEXTURES) 
@@ -67,7 +67,7 @@ bool Engine::loadSceneTextureConnections() {
       }
 
       model->useTextures = any;
-      debugLog("Scene", "loadSceneTextureConnections", "unbind: " + connection->modelName + "[slot " + std::to_string(connection->slot) + "]", true);
+      debugLog("Scene", "loadSceneTextureConnections", "unbind: " + connection->modelName + "[slot " + std::to_string(connection->slot) + "]");
       continue;
     }
 
@@ -78,10 +78,10 @@ bool Engine::loadSceneTextureConnections() {
     model->textureNames[connection->slot] = connection->textureName;
     model->textureMixRatio[connection->slot] = (connection->mix < 0.0f) ? 0.0f : (connection->mix > 1.0f ? 1.0f : connection->mix);
   }
-  return debugLog("Engine", "loadSceneTextureConnections", "Finish time: " + std::to_string(glfwGetTime()), true);
+  return debugLog("Engine", "loadSceneTextureConnections", "Finish time: " + std::to_string(glfwGetTime()));
 }
 bool Engine::loadScenePrimitives() {
-  debugLog("Engine", "loadScenePrimitives", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadScenePrimitives", "Start time: " + std::to_string(glfwGetTime()));
 
   for (Primitive* primitive : sceneManager.getScene().getComponentsOfType<Primitive>()) {
     if (!renderer.createPrimitiveMesh(*primitive))
@@ -107,10 +107,10 @@ bool Engine::loadScenePrimitives() {
     model->colourMode = primitive->colourMode;
   }
 
-  return debugLog("Engine", "loadScenePrimitives", "Finish time: " + std::to_string(glfwGetTime()), true);
+  return debugLog("Engine", "loadScenePrimitives", "Finish time: " + std::to_string(glfwGetTime()));
 }
 bool Engine::loadSceneGrids() {
-  debugLog("Engine", "loadSceneGrids", "Start time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Engine", "loadSceneGrids", "Start time: " + std::to_string(glfwGetTime()));
 
   for (const Grid* grid : sceneManager.getScene().getComponentsOfType<Grid>()) {
     std::string sharedName = grid->name + (grid->type == GridType::Square ? "_sharedSquare" : "_sharedCube");
@@ -156,5 +156,5 @@ bool Engine::loadSceneGrids() {
     }
   }
 
-  return debugLog("Engine", "loadSceneGrids", "Finish time: " + std::to_string(glfwGetTime()), true);
+  return debugLog("Engine", "loadSceneGrids", "Finish time: " + std::to_string(glfwGetTime()));
 }

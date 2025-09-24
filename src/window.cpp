@@ -19,7 +19,7 @@ bool Window::createWindow(const unsigned int widthIn, const unsigned int heightI
 
 	width = widthIn;
 	height = heightIn;
-	return debugLog("Window", "createWindow", "Created window: " + std::string(title) + " - " + std::to_string(width) + " x " + std::to_string(height), true);
+	return debugLog("Window", "createWindow", "Created window: " + std::string(title) + " - " + std::to_string(width) + " x " + std::to_string(height));
 }
 bool Window::shouldClose() const {
 	return window ? glfwWindowShouldClose(window) : true;
@@ -65,7 +65,7 @@ bool Window::switchCursorLock() {
 	const bool newLock = !locked;
 	glfwSetInputMode(window, GLFW_CURSOR, newLock ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 
-	debugLog("WindowManager", "toggleCursorLock", std::string("Cursor ") + (newLock ? "locked" : "unlocked"), true);
+	debugLog("WindowManager", "toggleCursorLock", std::string("Cursor ") + (newLock ? "locked" : "unlocked"));
 	return newLock;
 }
 

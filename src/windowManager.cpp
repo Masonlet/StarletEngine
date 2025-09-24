@@ -19,7 +19,7 @@ WindowManager::~WindowManager() {
 }
 
 bool WindowManager::createWindow(const unsigned int width, const unsigned int height, const char* title) {
-  debugLog("WindowManager", "createWindow", "Start time : " + std::to_string(glfwGetTime()), true);
+  debugLog("WindowManager", "createWindow", "Start time : " + std::to_string(glfwGetTime()));
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_MAJOR);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_MINOR);
@@ -44,9 +44,9 @@ bool WindowManager::createWindow(const unsigned int width, const unsigned int he
 
   glfwSwapInterval(1);
 
-  debugLog("Window", "OpenGL", "OpenGL Info", true);
-  debugLog("Window", "OpenGL", "Version: " + std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))), true);
-  debugLog("Window", "OpenGL", "Vendor: " + std::string(reinterpret_cast<const char*>(glGetString(GL_VENDOR))), true);
-  debugLog("Window", "OpenGL", "Renderer: " + std::string(reinterpret_cast<const char*>(glGetString(GL_RENDERER))), true);
-  return debugLog("WindowManager", "createWindow", "Finish time: " + std::to_string(glfwGetTime()), true);
+  debugLog("Window", "OpenGL", "OpenGL Info");
+  debugLog("Window", "OpenGL", "Version: " + std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
+  debugLog("Window", "OpenGL", "Vendor: " + std::string(reinterpret_cast<const char*>(glGetString(GL_VENDOR))));
+  debugLog("Window", "OpenGL", "Renderer: " + std::string(reinterpret_cast<const char*>(glGetString(GL_RENDERER))));
+  return debugLog("WindowManager", "createWindow", "Finish time: " + std::to_string(glfwGetTime()));
 }
