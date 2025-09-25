@@ -1,6 +1,7 @@
 #include "StarletEngine/window.hpp"
 
 #include "StarletControls/inputManager.hpp"
+
 #include "StarletParsers/utils/log.hpp"
 
 #include <GLFW/glfw3.h>
@@ -42,9 +43,6 @@ void Window::setCurrentWindow() const {
 	if (window) glfwMakeContextCurrent(window);
 }
 
-void Window::updateInput(InputManager& inputManager) {
-	if (window) inputManager.update(window);
-}
 void Window::updateViewport(const unsigned int widthIn, const unsigned int heightIn) {
 	width = widthIn;
 	height = heightIn;

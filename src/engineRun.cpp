@@ -21,20 +21,13 @@ void Engine::run() {
  
     inputManager.clear();
     windowManager.pollEvents();
-    windowManager.updateInput(inputManager);
+    inputManager.update(windowManager.getGLFWwindow());
 
     handleKeyEvents(inputManager.consumeKeyEvents());
    
-    Camera* cam{ getActiveCamera() };
-    if (!cam) {
-      error("Engine", "renderFrame", "No active camera while rendering!");
-      return;
-    }
-    cameraController.update(*cam, inputManager, deltaTime);
-    cameraController.adjustFov(*cam, static_cast<float>(-inputManager.consumeScrollY()));
-
 		Scene& scene{ sceneManager.getScene() };
-    renderer.renderFrame(*cam, windowManager.getAspect(), scene.getComponentsOfType<Light>(), scene.getComponentsOfType<Model>(), *scene.getComponentByName<Model>(std::string("skybox")));
+    scene.updateSystems(inputManager, deltaTime);
+    renderer.renderFrame(scene, windowManager.getAspect());
 
     windowManager.swapBuffers();
   }
@@ -55,11 +48,5 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
   }
 }
 
-Camera* Engine::getActiveCamera() {
-  Camera* cam{ sceneManager.getScene().getComponentByIndex<Camera>(cameraController.current) };
-  if (!cam) {
-    error("Engine", "getActiveCamera", "No active camera found for selected camera");
-    return nullptr;
-  }
-  return cam;
-}
+
+

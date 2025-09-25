@@ -1,5 +1,6 @@
 #include "StarletEngine/engine.hpp"
 
+#include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/light.hpp"
 #include "StarletScene/components/camera.hpp"
@@ -7,6 +8,10 @@
 #include "StarletScene/components/textureData.hpp"
 #include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/primitive.hpp"
+
+#include "StarletScene/systems/cameraMoveSystem.hpp"
+#include "StarletScene/systems/cameraLookSystem.hpp"
+#include "StarletScene/systems/cameraFovSystem.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -29,7 +34,7 @@ bool Engine::loadScene(const std::string& sceneIn) {
   debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()));
 
   debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()));
-  renderer.updateLightUniforms(sceneManager.getScene().getComponentsOfType<Light>());
+  renderer.updateLightUniforms(sceneManager.getScene());
   debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()));
 
   debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()));
@@ -39,6 +44,10 @@ bool Engine::loadScene(const std::string& sceneIn) {
   ok &= loadSceneTextureConnections();
   ok &= loadScenePrimitives();
   ok &= loadSceneGrids();
+
+  sceneManager.getScene().registerSystem(std::make_unique<CameraMoveSystem>());
+	sceneManager.getScene().registerSystem(std::make_unique<CameraLookSystem>());
+	sceneManager.getScene().registerSystem(std::make_unique<CameraFovSystem>());
 
   return ok
     ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()))
@@ -85,20 +94,24 @@ bool Engine::loadScenePrimitives() {
   debugLog("Engine", "loadScenePrimitives", "Start time: " + std::to_string(glfwGetTime()));
 
   for (Primitive* primitive : sceneManager.getScene().getComponentsOfType<Primitive>()) {
-    if (!renderer.createPrimitiveMesh(*primitive))
+    const StarEntity entity = primitive->id;
+    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity)) 
+      return error("Engine", "loadScenePrimitives", "Primitive entity has no transform component.");
+
+    const TransformComponent& transform = sceneManager.getScene().getComponent<TransformComponent>(entity);
+
+    if (!renderer.createPrimitiveMesh(*primitive, transform))
       return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive->name);
 
     MeshGPU* primMesh;
     if (!renderer.getMesh(primitive->name, primMesh))
       return error("Engine", "loadScenePrimitives", "Failed to load primitive mesh: " + primitive->name);
 
-    StarEntity e = sceneManager.getScene().createEntity();
-    Model* model = sceneManager.getScene().addComponent<Model>(e);
+    Model* model = sceneManager.getScene().addComponent<Model>(entity);
     if (!model) return error("Engine", "loadScenePrimitives", "Failed to create model component for primitive: " + primitive->name);
 
     model->name = primitive->name;
     model->meshPath = primitive->name;
-    model->transform = primitive->transform;
     model->useTextures = false;
     for (unsigned i = 0; i < Model::NUM_TEXTURES; ++i) {
       model->textureNames[i].clear();
@@ -116,7 +129,13 @@ bool Engine::loadSceneGrids() {
   for (const Grid* grid : sceneManager.getScene().getComponentsOfType<Grid>()) {
     std::string sharedName = grid->name + (grid->type == GridType::Square ? "_sharedSquare" : "_sharedCube");
 
-    if (!renderer.createGridMesh(*grid, sharedName))
+    const StarEntity entity = grid->id;
+    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity)) 
+      return error("Engine", "loadSceneGrids", "Grid entity has no transform component.");
+    
+    const TransformComponent& gridTransform = sceneManager.getScene().getComponent<TransformComponent>(entity);
+
+    if (!renderer.createGridMesh(*grid, gridTransform, sharedName))
       return error("Engine", "loadSceneGrids", "Failed to create mesh for: " + sharedName);
 
     const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
@@ -138,6 +157,10 @@ bool Engine::loadSceneGrids() {
       }
 
       StarEntity e = sceneManager.getScene().createEntity();
+
+      TransformComponent* transform = sceneManager.getScene().addComponent<TransformComponent>(e);
+      if (!transform) return error("Engine", "loadSceneGrids", "Failed to add TransformComponent for grid instance: " + grid->name);
+
       Model* model = sceneManager.getScene().addComponent<Model>(e);
       if (!model) return error("Engine", "loadSceneGrids", "Failed to add grid instance model: " + sharedName);
 
@@ -150,10 +173,6 @@ bool Engine::loadSceneGrids() {
       }
       model->colour = grid->colour;
       model->colourMode = grid->colourMode;
-
-      model->transform.pos = { pos, 1.0f };
-      model->transform.rot = grid->transform.rot;
-      model->transform.size = grid->transform.size;
     }
   }
 

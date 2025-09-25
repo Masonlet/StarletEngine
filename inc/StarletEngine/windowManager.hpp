@@ -10,6 +10,8 @@ public:
   WindowManager();
   ~WindowManager();
 
+	GLFWwindow* getGLFWwindow() const { return activeWindow ? activeWindow->getGLFWwindow() : nullptr; }
+
   bool createWindow(const unsigned int width, const unsigned int height, const char* title);
   inline bool shouldClose() const { return activeWindow ? activeWindow->shouldClose() : true; }
 
@@ -23,7 +25,6 @@ public:
 
   inline void setWindowPointer(void* userPointer) const { if (activeWindow) activeWindow->setWindowPointer(userPointer); }
 
-  inline void updateInput(InputManager& inputManager) { if (activeWindow) activeWindow->updateInput(inputManager); }
   inline void updateViewport(const unsigned int width, const unsigned int height) { if (activeWindow) activeWindow->updateViewport(width, height); }
 
   inline bool switchActiveWindowVisibility() const { return activeWindow ? activeWindow->switchActiveWindowVisibility() : false; }

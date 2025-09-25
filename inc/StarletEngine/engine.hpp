@@ -5,8 +5,6 @@
 #include "StarletGraphics/renderer.hpp"
 #include "StarletScene/sceneManager.hpp"
 #include "StarletControls/inputManager.hpp"
-#include "StarletControls/modelController.hpp"
-#include "StarletControls/cameraController.hpp"
 
 class Engine {
 public:
@@ -14,8 +12,6 @@ public:
 	bool initialize(const unsigned int width, const unsigned int height, const char* title);
 	bool loadScene(const std::string& sceneIn = "Default");
 	void run();
-
-	Camera* getActiveCamera();
 
 	inline void updateViewport(const int width, const int height) { windowManager.updateViewport(width, height); }
 
@@ -29,11 +25,7 @@ private:
 	WindowManager windowManager;
 	Renderer renderer;
 	SceneManager sceneManager;
-
 	InputManager inputManager;
-	ModelController modelController;
-	FreeCameraController cameraController;
-
 	Timer timer;
 
 	bool setupShaders();
