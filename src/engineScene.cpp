@@ -12,6 +12,7 @@
 #include "StarletScene/systems/cameraMoveSystem.hpp"
 #include "StarletScene/systems/cameraLookSystem.hpp"
 #include "StarletScene/systems/cameraFovSystem.hpp"
+#include "StarletScene/systems/velocitySystem.hpp"
 
 #include <GLFW/glfw3.h>
 
@@ -48,6 +49,7 @@ bool Engine::loadScene(const std::string& sceneIn) {
   sceneManager.getScene().registerSystem(std::make_unique<CameraMoveSystem>());
 	sceneManager.getScene().registerSystem(std::make_unique<CameraLookSystem>());
 	sceneManager.getScene().registerSystem(std::make_unique<CameraFovSystem>());
+  sceneManager.getScene().registerSystem(std::make_unique<VelocitySystem>());
 
   return ok
     ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()))
