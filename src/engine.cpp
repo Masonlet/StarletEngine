@@ -1,13 +1,7 @@
 #include "StarletEngine/engine.hpp"
 
-#include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/model.hpp"
-#include "StarletScene/components/light.hpp"
-#include "StarletScene/components/camera.hpp"
-#include "StarletScene/components/grid.hpp"
 #include "StarletScene/components/textureData.hpp"
-#include "StarletScene/components/textureConnection.hpp"
-#include "StarletScene/components/primitive.hpp"
 
 #include "StarletScene/systems/cameraMoveSystem.hpp"
 #include "StarletScene/systems/cameraLookSystem.hpp"
@@ -39,22 +33,45 @@ bool Engine::loadScene(const std::string& sceneIn) {
 
   if (sceneIn.empty()) {
     if (!sceneManager.loadTxtScene("EmptyScene.txt"))
-      return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
+      return error("Engine", "loadScene", "No scene loaded and failed to load Default \"EmptyScene\"");
   }
   else if (!sceneManager.loadTxtScene(sceneIn + ".txt"))
-    return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
+    return error("Engine", "loadScene", "Failed to load scene: " + sceneIn);
 
   if (renderer.getProgram() == 0) return error("Engine", "loadScene", "No active shader program set after loading scene");
 
   if (!resourceLoader) resourceLoader = std::make_unique<ResourceLoader>(renderer);
 
   bool ok = true;
-  ok &= resourceLoader.get()->loadMeshes(sceneManager.getScene().getComponentsOfType<Model>());
-  resourceLoader.get()->updateLighting(sceneManager.getScene());
-  ok &= resourceLoader.get()->loadTextures(sceneManager.getScene().getComponentsOfType<TextureData>());
-  ok &= resourceLoader.get()->processTextureConnections(sceneManager);
-  ok &= resourceLoader.get()->processPrimitives(sceneManager);
-  ok &= resourceLoader.get()->processGrids(sceneManager);
+
+  debugLog("ResourceLoader", "loadMeshes", "Start time: " + std::to_string(glfwGetTime()));
+  if(!resourceLoader.get()->loadMeshes(sceneManager.getScene().getComponentsOfType<Model>()))
+		return error("Engine", "loadMeshes", "Failed to load meshes for scene: " + sceneIn);
+  debugLog("ResourceLoader", "loadMeshes", "Finish time: " + std::to_string(glfwGetTime()));
+
+  debugLog("ResourceLoader", "loadTextures", "Start time: " + std::to_string(glfwGetTime()));
+  if(!resourceLoader.get()->loadTextures(sceneManager.getScene().getComponentsOfType<TextureData>()))
+		return error("Engine", "loadTextures", "Failed to load textures for scene: " + sceneIn);
+  debugLog("ResourceLoader", "loadTextures", "Finish time: " + std::to_string(glfwGetTime()));
+
+  debugLog("ResourceLoader", "processTextureConnections", "Start time: " + std::to_string(glfwGetTime()));
+  if(!resourceLoader.get()->processTextureConnections(sceneManager))
+		return error("Engine", "processTextureConnections", "Failed to process texture connections for scene: " + sceneIn);
+  debugLog("ResourceLoader", "processTextureConnections", "Finish time: " + std::to_string(glfwGetTime()));
+
+  debugLog("ResourceLoader", "processPrimitives", "Start time: " + std::to_string(glfwGetTime()));
+  if(!resourceLoader.get()->processPrimitives(sceneManager))
+		return error("Engine", "processPrimitives", "Failed to process primitives for scene: " + sceneIn);
+  debugLog("ResourceLoader", "processPrimitives", "Finish time: " + std::to_string(glfwGetTime()));
+
+  debugLog("ResourceLoader", "processGrids", "Start time: " + std::to_string(glfwGetTime()));
+  if(!resourceLoader.get()->processGrids(sceneManager))
+		return error("Engine", "processGrids", "Failed to process grids for scene: " + sceneIn);
+  debugLog("ResourceLoader", "processGrids", "Finish time: " + std::to_string(glfwGetTime()));
+
+  debugLog("ResourceLoader", "updateLightUniforms", "Start time: " + std::to_string(glfwGetTime()));
+  renderer.updateLightUniforms(sceneManager.getScene());
+  debugLog("ResourceLoader", "updateLightUniforms", "Finish time: " + std::to_string(glfwGetTime()));
 
   sceneManager.getScene().registerSystem(std::make_unique<CameraMoveSystem>());
   sceneManager.getScene().registerSystem(std::make_unique<CameraLookSystem>());

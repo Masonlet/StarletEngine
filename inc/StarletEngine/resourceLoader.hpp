@@ -11,7 +11,6 @@ public:
 	ResourceLoader(Renderer& rendererIn) : renderer(rendererIn) {};
 
 	bool loadMeshes(const std::vector<Model*>& models);
-	void updateLighting(const Scene& scene);
 	bool loadTextures(const std::vector<TextureData*>& textures);
 
 	bool processTextureConnections(SceneManager& sceneManager);
