@@ -2,6 +2,7 @@
 
 #include "windowManager.hpp"
 #include "timer.hpp"
+#include "resourceLoader.hpp"
 #include "StarletGraphics/renderer.hpp"
 #include "StarletScene/sceneManager.hpp"
 #include "StarletControls/inputManager.hpp"
@@ -27,12 +28,7 @@ private:
 	SceneManager sceneManager;
 	InputManager inputManager;
 	Timer timer;
-
-	bool setupShaders();
-
-	bool loadSceneTextureConnections();
-	bool loadScenePrimitives();
-	bool loadSceneGrids();
+	std::unique_ptr<ResourceLoader> resourceLoader;
 
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
 };

@@ -1,4 +1,4 @@
-#include "StarletEngine/engine.hpp"
+#include "StarletEngine/resourceLoader.hpp"
 
 #include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/model.hpp"
@@ -9,61 +9,34 @@
 #include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/primitive.hpp"
 
-#include "StarletScene/systems/cameraMoveSystem.hpp"
-#include "StarletScene/systems/cameraLookSystem.hpp"
-#include "StarletScene/systems/cameraFovSystem.hpp"
-#include "StarletScene/systems/velocitySystem.hpp"
-
 #include <GLFW/glfw3.h>
 
-bool Engine::loadScene(const std::string& sceneIn) {
-  debugLog("Engine", "loadScene", "Start time: " + std::to_string(glfwGetTime()));
-
-  if (sceneIn.empty()) {
-    if (!sceneManager.loadTxtScene("EmptyScene.txt"))
-      return error("Engine", "loadSceneMeshes", "No scene loaded and failed to load Default \"EmptyScene\"");
-  }
-  else if (!sceneManager.loadTxtScene(sceneIn + ".txt"))
-    return error("Engine", "setScene", "Failed to load scene: " + sceneIn);
-
-  if (renderer.getProgram() == 0) return error("Engine", "loadScene", "No active shader program set after loading scene");
-
-  bool ok = true;
-
-  debugLog("Engine", "loadSceneMeshes", "Start time: " + std::to_string(glfwGetTime()));
-  ok &= renderer.addMeshes(sceneManager.getScene().getComponentsOfType<Model>());
-  debugLog("Engine", "loadSceneMeshes", "Finish time: " + std::to_string(glfwGetTime()));
-
-  debugLog("Engine", "loadSceneLighting", "Start time: " + std::to_string(glfwGetTime()));
-  renderer.updateLightUniforms(sceneManager.getScene());
-  debugLog("Engine", "loadSceneLighting", "Finish time: " + std::to_string(glfwGetTime()));
-
-  debugLog("Engine", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()));
-  ok &= renderer.addTextures(sceneManager.getScene().getComponentsOfType<TextureData>());
-  debugLog("Engine", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()));
-
-  ok &= loadSceneTextureConnections();
-  ok &= loadScenePrimitives();
-  ok &= loadSceneGrids();
-
-  sceneManager.getScene().registerSystem(std::make_unique<CameraMoveSystem>());
-	sceneManager.getScene().registerSystem(std::make_unique<CameraLookSystem>());
-	sceneManager.getScene().registerSystem(std::make_unique<CameraFovSystem>());
-  sceneManager.getScene().registerSystem(std::make_unique<VelocitySystem>());
-
-  return ok
-    ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()))
-    : error("Engine", "loadScene", "Failed to load scene: " + sceneIn);;
+bool ResourceLoader::loadMeshes(const std::vector<Model*>& models) {
+  debugLog("ResourceLoader", "loadMeshes", "Start time: " + std::to_string(glfwGetTime()));
+  return renderer.addMeshes(models)
+    ? debugLog("ResourceLoader", "loadMeshes", "Finish time: " + std::to_string(glfwGetTime()))
+    : error("ResourceLoader", "loadMeshes", "Failed to load models");
+}
+void ResourceLoader::updateLighting(const Scene& scene) {
+  debugLog("ResourceLoader", "updateLighting", "Start time: " + std::to_string(glfwGetTime()));
+  renderer.updateLightUniforms(scene);
+  debugLog("ResourceLoader", "updateLighting", "Finish time: " + std::to_string(glfwGetTime()));
+}
+bool ResourceLoader::loadTextures(const std::vector<TextureData*>& textures) {
+  debugLog("ResourceLoader", "loadSceneTextures", "Start time: " + std::to_string(glfwGetTime()));
+  return renderer.addTextures(textures) 
+    ? debugLog("ResourceLoader", "loadSceneTextures", "Finish time: " + std::to_string(glfwGetTime()))
+    : error("ResourceLoader", "loadMeshes", "Failed to load models");
 }
 
-bool Engine::loadSceneTextureConnections() {
+bool ResourceLoader::processTextureConnections(SceneManager& sceneManager) {
   debugLog("Engine", "loadSceneTextureConnections", "Start time: " + std::to_string(glfwGetTime()));
 
   for (const TextureConnection* connection : sceneManager.getScene().getComponentsOfType<TextureConnection>()) {
-    if (connection->slot >= Model::NUM_TEXTURES) 
+    if (connection->slot >= Model::NUM_TEXTURES)
       return error("Engine", "loadSceneTextureConnection", "Slot out of range: " + std::to_string(connection->slot));
 
-    Model* model { sceneManager.getScene().getComponentByName<Model>(connection->modelName) };
+    Model* model{ sceneManager.getScene().getComponentByName<Model>(connection->modelName) };
     if (!model) return error("Engine", "loadSceneTextureConnection", "Model " + connection->modelName + " not found for connection " + connection->name);
 
     if (connection->textureName.empty() || connection->mix <= 0.0f) {
@@ -83,7 +56,7 @@ bool Engine::loadSceneTextureConnections() {
       continue;
     }
 
-    TextureData* texture { sceneManager.getScene().getComponentByName<TextureData>(connection->textureName) };
+    TextureData* texture{ sceneManager.getScene().getComponentByName<TextureData>(connection->textureName) };
     if (!texture) return error("Engine", "loadSceneTextureConnection", "Texture " + connection->textureName + " not found for connection " + connection->name);
 
     model->useTextures = true;
@@ -92,12 +65,12 @@ bool Engine::loadSceneTextureConnections() {
   }
   return debugLog("Engine", "loadSceneTextureConnections", "Finish time: " + std::to_string(glfwGetTime()));
 }
-bool Engine::loadScenePrimitives() {
+bool ResourceLoader::processPrimitives(SceneManager& sceneManager) {
   debugLog("Engine", "loadScenePrimitives", "Start time: " + std::to_string(glfwGetTime()));
 
   for (Primitive* primitive : sceneManager.getScene().getComponentsOfType<Primitive>()) {
     const StarEntity entity = primitive->id;
-    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity)) 
+    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity))
       return error("Engine", "loadScenePrimitives", "Primitive entity has no transform component.");
 
     const TransformComponent& transform = sceneManager.getScene().getComponent<TransformComponent>(entity);
@@ -125,16 +98,16 @@ bool Engine::loadScenePrimitives() {
 
   return debugLog("Engine", "loadScenePrimitives", "Finish time: " + std::to_string(glfwGetTime()));
 }
-bool Engine::loadSceneGrids() {
+bool ResourceLoader::processGrids(SceneManager& sceneManager) {
   debugLog("Engine", "loadSceneGrids", "Start time: " + std::to_string(glfwGetTime()));
 
   for (const Grid* grid : sceneManager.getScene().getComponentsOfType<Grid>()) {
     std::string sharedName = grid->name + (grid->type == GridType::Square ? "_sharedSquare" : "_sharedCube");
 
     const StarEntity entity = grid->id;
-    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity)) 
+    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity))
       return error("Engine", "loadSceneGrids", "Grid entity has no transform component.");
-    
+
     const TransformComponent& gridTransform = sceneManager.getScene().getComponent<TransformComponent>(entity);
 
     if (!renderer.createGridMesh(*grid, gridTransform, sharedName))
