@@ -10,22 +10,29 @@
 
 #include <GLFW/glfw3.h>
 
-Engine::Engine() : renderer(shaderManager, meshManager, textureManager), resourceLoader(shaderManager, meshManager, textureManager) {}
+Engine::Engine() : renderer(shaderManager, meshManager, textureManager), resourceLoader(meshManager, textureManager) {}
 
 void Engine::setAssetPaths(const std::string& path) {
-  renderer.setAssetPaths(path.c_str());
+  shaderManager.setBasePath(path.c_str());
+  meshManager.setBasePath(path.c_str());
+  textureManager.setBasePath(path.c_str());
   sceneManager.setBasePath((path + "/scenes/").c_str());
 }
-
 bool Engine::initialize(const unsigned int width, const unsigned int height, const char* title) {
   debugLog("Engine", "initialize", "Start time: " + std::to_string(glfwGetTime()));
 
   if (!windowManager.createWindow(width, height, title)) return false;
   windowManager.setWindowPointer(this);
 
-  debugLog("Renderer", "setupShaders", "Start time: " + std::to_string(glfwGetTime()));
-  if (!renderer.setupShaders()) return false;
-  debugLog("Renderer", "setupShaders", "Finish time: " + std::to_string(glfwGetTime()));
+	debugLog("ShaderManager", "createProgramFromPaths", "Start time: " + std::to_string(glfwGetTime()));
+  if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
+    return error("Engine", "initialize", "Failed to create shader program from file");
+	debugLog("ShaderManager", "createProgramFromPaths", "Finish time: " + std::to_string(glfwGetTime()));
+
+  debugLog("Renderer", "initialize", "Start time: " + std::to_string(glfwGetTime()));
+  if (!renderer.initialize()) 
+    return error("Engine", "initialize", "Failed to setup shaders for renderer");
+  debugLog("Renderer", "initialize", "Finish time: " + std::to_string(glfwGetTime()));
 
   return debugLog("Engine", "initialize", "Finish time: " + std::to_string(glfwGetTime()));
 }

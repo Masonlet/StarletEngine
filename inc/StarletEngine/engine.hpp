@@ -14,6 +14,7 @@ public:
 
 	void setAssetPaths(const std::string& path);
 	bool initialize(const unsigned int width, const unsigned int height, const char* title);
+
 	bool loadScene(const std::string& sceneIn = "Default");
 	void run();
 
@@ -27,14 +28,16 @@ public:
 
 private:
 	WindowManager windowManager;
+	Timer timer;
+	InputManager inputManager;
+
 	ShaderManager shaderManager;
 	MeshManager meshManager;
 	TextureManager textureManager;
+
 	Renderer renderer;
 	ResourceLoader resourceLoader;
-	Timer timer;
 	SceneManager sceneManager;
-	InputManager inputManager;
 
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
 };

@@ -13,7 +13,7 @@ class SceneManager;
 
 class ResourceLoader {
 public:
-	ResourceLoader(ShaderManager& sm, MeshManager& mm, TextureManager& tm) : shaderManager{ sm }, meshManager{ mm }, textureManager{ tm } {};
+	ResourceLoader(MeshManager& mm, TextureManager& tm) : meshManager{ mm }, textureManager{ tm } {};
 
 	bool loadMeshes(const std::vector<Model*>& models);
 	bool loadTextures(const std::vector<TextureData*>& textures);
@@ -26,7 +26,6 @@ public:
 	bool createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName);
 
 private:
-	ShaderManager& shaderManager;
 	MeshManager& meshManager;
 	TextureManager& textureManager;
 };
