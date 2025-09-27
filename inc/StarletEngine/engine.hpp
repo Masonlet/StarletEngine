@@ -22,6 +22,7 @@ public:
 
 	inline void onKey(const KeyEvent& event) { inputManager.onKey(event); }
 	inline void onScroll(double xOffset, double yOffset) { inputManager.onScroll(xOffset, yOffset); }
+	inline void onButton(const MouseButtonEvent& event) { inputManager.onButton(event); }
 
 	inline void toggleCursorLock() { inputManager.setCursorLocked(windowManager.switchCursorLock()); }
 	inline void toggleWireframe() { renderer.toggleWireframe(); };
@@ -40,4 +41,5 @@ private:
 	SceneManager sceneManager;
 
 	void handleKeyEvents(const std::vector<KeyEvent>& keyEvents);
+	void handleButtonEvents(const std::vector<MouseButtonEvent>& buttonEvents);
 };

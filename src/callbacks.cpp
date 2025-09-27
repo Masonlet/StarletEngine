@@ -23,3 +23,8 @@ void scroll_callback(GLFWwindow* window, const double xOffset, const double yOff
 	if (!engine) return;
 	engine->onScroll(xOffset, yOffset);
 }
+void mouse_button_callback(GLFWwindow* window, const int button, const int action, const int mods) {
+	Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+	if (!engine) return;
+	engine->onButton({ button, action, mods });
+}

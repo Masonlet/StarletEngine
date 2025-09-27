@@ -93,11 +93,12 @@ void Engine::run() {
   while (!windowManager.shouldClose()) {
     const float deltaTime = timer.tick();
 
-    inputManager.clear();
+    inputManager.reset();
     windowManager.pollEvents();
-    inputManager.update(windowManager.getGLFWwindow());
+    inputManager.updateMousePosition(windowManager.getGLFWwindow());
 
     handleKeyEvents(inputManager.consumeKeyEvents());
+    handleButtonEvents(inputManager.consumeButtonEvents());
 
     sceneManager.getScene().updateSystems(inputManager, deltaTime);
     renderer.renderFrame(sceneManager.getScene(), windowManager.getAspect());
@@ -118,5 +119,28 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
     case GLFW_KEY_C: toggleCursorLock(); break;
 #endif
     }
+  }
+}
+
+void Engine::handleButtonEvents(const std::vector<MouseButtonEvent>& buttonEvents) {
+  for (const MouseButtonEvent event : buttonEvents) {
+    std::string buttonName;
+    switch (event.button) {
+    case GLFW_MOUSE_BUTTON_LEFT:   buttonName = "Left"; break;
+    case GLFW_MOUSE_BUTTON_RIGHT:  buttonName = "Right"; break;
+    case GLFW_MOUSE_BUTTON_MIDDLE: buttonName = "Middle"; break;
+    case GLFW_MOUSE_BUTTON_4:      buttonName = "Side_Forward"; break;
+    case GLFW_MOUSE_BUTTON_5:      buttonName = "Side_Backward"; break;
+    default: buttonName = "Unknown"; break;
+    }
+
+    std::string actionName;
+    switch (event.action) {
+    case GLFW_PRESS:   actionName = "Pressed"; break;
+    case GLFW_RELEASE: actionName = "Released"; break;
+    default: return;
+    }
+
+    debugLog("Input", "Mouse", "Button " + buttonName + " " + actionName);
   }
 }
