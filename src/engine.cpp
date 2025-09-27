@@ -13,11 +13,12 @@
 Engine::Engine() : renderer(shaderManager, meshManager, textureManager), resourceLoader(meshManager, textureManager) {}
 
 void Engine::setAssetPaths(const std::string& path) {
-  shaderManager.setBasePath(path.c_str());
-  meshManager.setBasePath(path.c_str());
-  textureManager.setBasePath(path.c_str());
+  shaderManager.setBasePath((path + "/shaders/").c_str());
+  meshManager.setBasePath((path + "/models/").c_str());
+  textureManager.setBasePath((path + "/textures/").c_str());
   sceneManager.setBasePath((path + "/scenes/").c_str());
 }
+
 bool Engine::initialize(const unsigned int width, const unsigned int height, const char* title) {
   debugLog("Engine", "initialize", "Start time: " + std::to_string(glfwGetTime()));
 
@@ -34,7 +35,9 @@ bool Engine::initialize(const unsigned int width, const unsigned int height, con
     return error("Engine", "initialize", "Failed to setup shaders for renderer");
   debugLog("Renderer", "initialize", "Finish time: " + std::to_string(glfwGetTime()));
 
-  return debugLog("Engine", "initialize", "Finish time: " + std::to_string(glfwGetTime()));
+  return (renderer.getProgram() == 0)
+    ? error("Engine", "initialize", "No active shader program set after initializing")
+		: debugLog("Engine", "initialize", "Finish Time: " + std::to_string(glfwGetTime()));
 }
 
 bool Engine::loadScene(const std::string& sceneIn) {
@@ -46,10 +49,6 @@ bool Engine::loadScene(const std::string& sceneIn) {
   }
   else if (!sceneManager.loadTxtScene(sceneIn + ".txt"))
     return error("Engine", "loadScene", "Failed to load scene: " + sceneIn);
-
-  if (renderer.getProgram() == 0) return error("Engine", "loadScene", "No active shader program set after loading scene");
-
-  bool ok = true;
 
   debugLog("ResourceLoader", "loadMeshes", "Start time: " + std::to_string(glfwGetTime()));
   if(!resourceLoader.loadMeshes(sceneManager.getScene().getComponentsOfType<Model>()))
@@ -85,16 +84,14 @@ bool Engine::loadScene(const std::string& sceneIn) {
   sceneManager.getScene().registerSystem(std::make_unique<CameraFovSystem>());
   sceneManager.getScene().registerSystem(std::make_unique<VelocitySystem>());
 
-  return ok
-    ? debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()))
-    : error("Engine", "loadScene", "Failed to load scene: " + sceneIn);;
+  return debugLog("Engine", "loadScene", "Finish Time: " + std::to_string(glfwGetTime()));
 }
 
 void Engine::run() {
   windowManager.switchActiveWindowVisibility();
 
   while (!windowManager.shouldClose()) {
-    float deltaTime = timer.tick();
+    const float deltaTime = timer.tick();
 
     inputManager.clear();
     windowManager.pollEvents();
@@ -102,9 +99,8 @@ void Engine::run() {
 
     handleKeyEvents(inputManager.consumeKeyEvents());
 
-    Scene& scene{ sceneManager.getScene() };
-    scene.updateSystems(inputManager, deltaTime);
-    renderer.renderFrame(scene, windowManager.getAspect());
+    sceneManager.getScene().updateSystems(inputManager, deltaTime);
+    renderer.renderFrame(sceneManager.getScene(), windowManager.getAspect());
 
     windowManager.swapBuffers();
   }
