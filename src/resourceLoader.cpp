@@ -1,5 +1,6 @@
 #include "StarletEngine/resourceLoader.hpp"
 
+#include "StarletScene/sceneManager.hpp"
 #include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/light.hpp"
@@ -9,11 +10,49 @@
 #include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/primitive.hpp"
 
+#include "StarletParsers/utils/log.hpp"
+
 bool ResourceLoader::loadMeshes(const std::vector<Model*>& models) {
-  return renderer.addMeshes(models);
+  for (const Model* model : models)
+    if (!meshManager.loadAndAddMesh(model->meshPath))
+      return error("Renderer", "addMeshes", "Failed to load/add mesh: " + model->meshPath);
+
+  return debugLog("Renderer", "addMeshes", "Added " + std::to_string(models.size()) + " meshes");
 }
 bool ResourceLoader::loadTextures(const std::vector<TextureData*>& textures) {
-  return renderer.addTextures(textures);
+  for (const TextureData* texture : textures) {
+    if (!texture->isCube) {
+      if (!textureManager.addTexture(texture->name, texture->faces[0]))
+        return error("Renderer", "loadSceneTextures", "Failed to load 2D texture: " + texture->name);
+    }
+    else if (!textureManager.addTextureCube(texture->name, texture->faces))
+      return error("Renderer", "loadSceneTextures", "Failed to load cube map: " + texture->name);
+  }
+
+  return debugLog("Renderer", "addTextures", "Added " + std::to_string(textures.size()) + " textures");
+}
+
+bool ResourceLoader::createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform) {
+  switch (primitive.type) {
+  case PrimitiveType::Triangle:
+    return meshManager.createTriangle(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
+  case PrimitiveType::Square:
+    return meshManager.createSquare(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
+  case PrimitiveType::Cube:
+    return meshManager.createCube(primitive.name, transform.size, primitive.colour);
+  default:
+    return error("Renderer", "loadScenePrimitives", "Invalid primitive: " + primitive.name);
+  }
+}
+bool ResourceLoader::createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName) {
+  switch (grid.type) {
+  case GridType::Square:
+    return meshManager.createSquare(meshName, { transform.size.x, transform.size.y }, grid.colour);
+  case GridType::Cube:
+    return meshManager.createCube(meshName, transform.size, grid.colour);
+  default:
+    return error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
+  }
 }
 
 bool ResourceLoader::processTextureConnections(SceneManager& sceneManager) {
@@ -50,22 +89,22 @@ bool ResourceLoader::processTextureConnections(SceneManager& sceneManager) {
   }
   return true;
 }
-bool ResourceLoader::processPrimitives(SceneManager& sceneManager) {
-  for (Primitive* primitive : sceneManager.getScene().getComponentsOfType<Primitive>()) {
+bool ResourceLoader::processPrimitives(SceneManager& sm) {
+  for (Primitive* primitive : sm.getScene().getComponentsOfType<Primitive>()) {
     const StarEntity entity = primitive->id;
-    if (!sceneManager.getScene().hasComponent<TransformComponent>(entity))
+    if (!sm.getScene().hasComponent<TransformComponent>(entity))
       return error("Engine", "loadScenePrimitives", "Primitive entity has no transform component.");
 
-    const TransformComponent& transform = sceneManager.getScene().getComponent<TransformComponent>(entity);
+    const TransformComponent& transform = sm.getScene().getComponent<TransformComponent>(entity);
 
-    if (!renderer.createPrimitiveMesh(*primitive, transform))
+    if (!createPrimitiveMesh(*primitive, transform))
       return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive->name);
 
     MeshGPU* primMesh;
-    if (!renderer.getMesh(primitive->name, primMesh))
+    if (!meshManager.getMeshGPU(primitive->name, primMesh))
       return error("Engine", "loadScenePrimitives", "Failed to load primitive mesh: " + primitive->name);
 
-    Model* model = sceneManager.getScene().addComponent<Model>(entity);
+    Model* model = sm.getScene().addComponent<Model>(entity);
     if (!model) return error("Engine", "loadScenePrimitives", "Failed to create model component for primitive: " + primitive->name);
 
     model->name = primitive->name;
@@ -91,7 +130,7 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
 
     const TransformComponent& gridTransform = sceneManager.getScene().getComponent<TransformComponent>(entity);
 
-    if (!renderer.createGridMesh(*grid, gridTransform, sharedName))
+    if (!createGridMesh(*grid, gridTransform, sharedName))
       return error("Engine", "loadSceneGrids", "Failed to create mesh for: " + sharedName);
 
     const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
