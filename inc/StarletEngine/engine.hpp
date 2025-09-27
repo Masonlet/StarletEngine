@@ -18,14 +18,14 @@ public:
 	bool loadScene(const std::string& sceneIn = "Default");
 	void run();
 
-	inline void updateViewport(const int width, const int height) { windowManager.updateViewport(width, height); }
+	void updateViewport(const int width, const int height) { windowManager.updateViewport(width, height); }
 
-	inline void onKey(const KeyEvent& event) { inputManager.onKey(event); }
-	inline void onScroll(double xOffset, double yOffset) { inputManager.onScroll(xOffset, yOffset); }
-	inline void onButton(const MouseButtonEvent& event) { inputManager.onButton(event); }
+	void onKey(const KeyEvent& event) { inputManager.onKey(event); }
+	void onScroll(double xOffset, double yOffset) { inputManager.onScroll(xOffset, yOffset); }
+	void onButton(const MouseButtonEvent& event) { inputManager.onButton(event); }
 
-	inline void toggleCursorLock() { inputManager.setCursorLocked(windowManager.switchCursorLock()); }
-	inline void toggleWireframe() { renderer.toggleWireframe(); };
+	void toggleCursorLock() { inputManager.setCursorLocked(windowManager.switchCursorLock()); }
+	void toggleWireframe() { renderer.toggleWireframe(); };
 
 private:
 	WindowManager windowManager;

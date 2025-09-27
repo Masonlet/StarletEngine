@@ -37,34 +37,40 @@ void Window::requestClose() const {
 }
 
 void Window::setWindowPointer(void* userPointer) const {
-	if (window) glfwSetWindowUserPointer(window, userPointer);
+	if (userPointer == nullptr) error("Window", "setWindowPointer", "User pointer cannot be null.");
+	else if (window) glfwSetWindowUserPointer(window, userPointer);
 }
 void Window::setCurrentWindow() const {
 	if (window) glfwMakeContextCurrent(window);
 }
 
 void Window::updateViewport(const unsigned int widthIn, const unsigned int heightIn) {
-	width = widthIn;
-	height = heightIn;
-	glViewport(0, 0, width, height);
+	if (window) {
+		width = widthIn;
+		height = heightIn;
+		glViewport(0, 0, width, height);
+	}
 }
 
 bool Window::switchActiveWindowVisibility() {
-	if (!window) return error("WindowManager", "switchActiveWindowVisibility", "No active window to switch visibility.");
+	if (!window) return error("Window", "switchActiveWindowVisibility", "No active window to switch visibility.");
 
-	glfwGetWindowAttrib(window, GLFW_VISIBLE) ? glfwHideWindow(window) : glfwShowWindow(window);
+	const int isVisible = (glfwGetWindowAttrib(window, GLFW_VISIBLE) == GLFW_TRUE) ? GLFW_FALSE : GLFW_TRUE; 
+	(isVisible == GLFW_TRUE) ? glfwShowWindow(window) : glfwHideWindow(window);
 
-	return glfwGetWindowAttrib(window, GLFW_VISIBLE);
+	return (isVisible == GLFW_TRUE)
+		? debugLog("Window", "switchWindowVisibility", "Window shown") 
+		: debugLog("Window", "switchWindowVisibility", "Window hidden", false);
 }
 bool Window::switchCursorLock() {
-	if (!window) return error("WindowManager", "switchCursorLock", "No active window to switch cursor lock.");
+	if (!window) return error("Window", "switchCursorLock", "No active window to switch cursor lock.");
 
-	const bool locked = glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
-	const bool newLock = !locked;
-	glfwSetInputMode(window, GLFW_CURSOR, newLock ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+	const int cursorMode = glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED;
+	glfwSetInputMode(window, GLFW_CURSOR, cursorMode);
 
-	debugLog("WindowManager", "toggleCursorLock", std::string("Cursor ") + (newLock ? "locked" : "unlocked"));
-	return newLock;
+	return (cursorMode == GLFW_CURSOR_DISABLED) 
+		? debugLog("Window", "switchCursorLock", "Cursor locked") 
+		: debugLog("Window", "switchCursorLock", "Cursor unlocked", false);
 }
 
 

@@ -8,8 +8,8 @@
 #include <GLFW/glfw3.h>
 #include <cstdio>
 
-constexpr int GL_MAJOR{ 3 };
-constexpr int GL_MINOR{ 3 };
+static constexpr int GL_MAJOR{ 3 };
+static constexpr int GL_MINOR{ 3 };
 
 WindowManager::WindowManager() {
   if (!glfwInit()) error("WindowManager", "Constructor", "Failed to initialize GLFW\n");
@@ -36,13 +36,13 @@ bool WindowManager::createWindow(const unsigned int width, const unsigned int he
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     return error("WindowManager", "createWindow", "Failed to initialize GLAD");
 
-  glfwSetKeyCallback(activeWindow->getGLFWwindow(), key_callback);
-  glfwSetFramebufferSizeCallback(activeWindow->getGLFWwindow(), framebuffer_size_callback);
-  glfwSetScrollCallback(activeWindow->getGLFWwindow(), scroll_callback);
-  glfwSetMouseButtonCallback(activeWindow->getGLFWwindow(), mouse_button_callback);
+  GLFWwindow* window = activeWindow->getGLFWwindow();
+  glfwSetKeyCallback(window, key_callback);
+  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+  glfwSetScrollCallback(window, scroll_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-  glfwSetInputMode(activeWindow->getGLFWwindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSwapInterval(1);
 
   debugLog("Window", "OpenGL", "OpenGL Info");
