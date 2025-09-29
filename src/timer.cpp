@@ -1,6 +1,5 @@
 #include "StarletEngine/timer.hpp"
-
-#include "StarletParsers/utils/log.hpp"
+#include "StarletParser/utils/log.hpp"
 
 #include "GLFW/glfw3.h"
 

@@ -37,6 +37,6 @@ if(NOT TARGET ${ENGINE_NAME})
   target_link_libraries(${ENGINE_NAME}
     PRIVATE
     glad glfw OpenGL::GL 
-    StarletMath StarletParsers StarletScene StarletGraphics StarletControls
+    StarletMath StarletParser StarletScene StarletGraphics StarletControls
   )
 endif()

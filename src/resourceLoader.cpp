@@ -10,7 +10,7 @@
 #include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/primitive.hpp"
 
-#include "StarletParsers/utils/log.hpp"
+#include "StarletParser/utils/log.hpp"
 
 bool ResourceLoader::loadMeshes(const std::vector<Model*>& models) {
   for (const Model* model : models)

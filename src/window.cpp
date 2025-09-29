@@ -1,8 +1,7 @@
 #include "StarletEngine/window.hpp"
+#include "StarletParser/utils/log.hpp"
 
 #include "StarletControls/inputManager.hpp"
-
-#include "StarletParsers/utils/log.hpp"
 
 #include <GLFW/glfw3.h>
 #include <cstdio>
