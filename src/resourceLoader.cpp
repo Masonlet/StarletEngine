@@ -55,40 +55,6 @@ bool ResourceLoader::createGridMesh(const Grid& grid, const std::string& meshNam
   }
 }
 
-bool ResourceLoader::processTextureConnections(SceneManager& sceneManager) {
-  for (const TextureConnection* connection : sceneManager.getScene().getComponentsOfType<TextureConnection>()) {
-    if (connection->slot >= Model::NUM_TEXTURES)
-      return error("Engine", "loadSceneTextureConnection", "Slot out of range: " + std::to_string(connection->slot));
-
-    Model* model{ sceneManager.getScene().getComponentByName<Model>(connection->modelName) };
-    if (!model) return error("Engine", "loadSceneTextureConnection", "Model " + connection->modelName + " not found for connection " + connection->name);
-
-    if (connection->textureName.empty() || connection->mix <= 0.0f) {
-      model->textureNames[connection->slot].clear();
-      model->textureMixRatio[connection->slot] = 0.0f;
-
-      bool any = false;
-      for (unsigned int i = 0; i < Model::NUM_TEXTURES; ++i) {
-        if (!model->textureNames[i].empty()) {
-          any = true;
-          break;
-        }
-      }
-
-      model->useTextures = any;
-      debugLog("Scene", "loadSceneTextureConnections", "unbind: " + connection->modelName + "[slot " + std::to_string(connection->slot) + "]");
-      continue;
-    }
-
-    TextureData* texture{ sceneManager.getScene().getComponentByName<TextureData>(connection->textureName) };
-    if (!texture) return error("Engine", "loadSceneTextureConnection", "Texture " + connection->textureName + " not found for connection " + connection->name);
-
-    model->useTextures = true;
-    model->textureNames[connection->slot] = connection->textureName;
-    model->textureMixRatio[connection->slot] = (connection->mix < 0.0f) ? 0.0f : (connection->mix > 1.0f ? 1.0f : connection->mix);
-  }
-  return true;
-}
 bool ResourceLoader::processPrimitives(SceneManager& sm) {
   for (Primitive* primitive : sm.getScene().getComponentsOfType<Primitive>()) {
     const StarEntity entity = primitive->id;

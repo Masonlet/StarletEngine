@@ -60,11 +60,6 @@ bool Engine::loadScene(const std::string& sceneIn) {
 		return error("Engine", "loadTextures", "Failed to load textures for scene: " + sceneIn);
   debugLog("ResourceLoader", "loadTextures", "Finish time: " + std::to_string(glfwGetTime()));
 
-  debugLog("ResourceLoader", "processTextureConnections", "Start time: " + std::to_string(glfwGetTime()));
-  if(!resourceLoader.processTextureConnections(sceneManager))
-		return error("Engine", "processTextureConnections", "Failed to process texture connections for scene: " + sceneIn);
-  debugLog("ResourceLoader", "processTextureConnections", "Finish time: " + std::to_string(glfwGetTime()));
-
   debugLog("ResourceLoader", "processPrimitives", "Start time: " + std::to_string(glfwGetTime()));
   if(!resourceLoader.processPrimitives(sceneManager))
 		return error("Engine", "processPrimitives", "Failed to process primitives for scene: " + sceneIn);

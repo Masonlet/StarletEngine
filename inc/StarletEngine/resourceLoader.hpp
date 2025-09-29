@@ -21,7 +21,6 @@ public:
 	bool loadMeshes(const std::vector<Model*>& models);
 	bool loadTextures(const std::vector<TextureData*>& textures);
 
-	bool processTextureConnections(SceneManager& sm);
 	bool processPrimitives(SceneManager& sm);
 	bool processGrids(SceneManager& sm);
 
