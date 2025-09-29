@@ -7,7 +7,6 @@
 #include "StarletScene/components/camera.hpp"
 #include "StarletScene/components/grid.hpp"
 #include "StarletScene/components/textureData.hpp"
-#include "StarletScene/components/textureConnection.hpp"
 #include "StarletScene/components/primitive.hpp"
 
 #include "StarletParser/utils/log.hpp"
