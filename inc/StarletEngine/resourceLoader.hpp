@@ -4,11 +4,14 @@
 #include "StarletGraphics/mesh/meshManager.hpp"
 #include "StarletGraphics/texture/textureManager.hpp"
 
+struct Primitive;
 struct Model;
 struct TextureData;
-struct Primitive;
 struct Grid;
+
 struct TransformComponent;
+struct ColourComponent;
+
 class SceneManager;
 
 class ResourceLoader {
@@ -22,8 +25,8 @@ public:
 	bool processPrimitives(SceneManager& sm);
 	bool processGrids(SceneManager& sm);
 
-	bool createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform);
-	bool createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName);
+	bool createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform, const ColourComponent& colour);
+	bool createGridMesh(const Grid& grid, const std::string& meshName, const TransformComponent& transform, const ColourComponent& colour);
 
 private:
 	MeshManager& meshManager;

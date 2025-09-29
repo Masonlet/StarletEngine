@@ -32,24 +32,24 @@ bool ResourceLoader::loadTextures(const std::vector<TextureData*>& textures) {
   return debugLog("Renderer", "addTextures", "Added " + std::to_string(textures.size()) + " textures");
 }
 
-bool ResourceLoader::createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform) {
+bool ResourceLoader::createPrimitiveMesh(const Primitive& primitive, const TransformComponent& transform, const ColourComponent& colour) {
   switch (primitive.type) {
   case PrimitiveType::Triangle:
-    return meshManager.createTriangle(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
+    return meshManager.createTriangle(primitive.name, { transform.size.x, transform.size.y }, colour.colour);
   case PrimitiveType::Square:
-    return meshManager.createSquare(primitive.name, { transform.size.x, transform.size.y }, primitive.colour);
+    return meshManager.createSquare(primitive.name, { transform.size.x, transform.size.y }, colour.colour);
   case PrimitiveType::Cube:
-    return meshManager.createCube(primitive.name, transform.size, primitive.colour);
+    return meshManager.createCube(primitive.name, transform.size, colour.colour);
   default:
     return error("Renderer", "loadScenePrimitives", "Invalid primitive: " + primitive.name);
   }
 }
-bool ResourceLoader::createGridMesh(const Grid& grid, const TransformComponent& transform, const std::string& meshName) {
+bool ResourceLoader::createGridMesh(const Grid& grid, const std::string& meshName, const TransformComponent& transform, const ColourComponent& colour) {
   switch (grid.type) {
   case GridType::Square:
-    return meshManager.createSquare(meshName, { transform.size.x, transform.size.y }, grid.colour);
+    return meshManager.createSquare(meshName, { transform.size.x, transform.size.y }, colour.colour);
   case GridType::Cube:
-    return meshManager.createCube(meshName, transform.size, grid.colour);
+    return meshManager.createCube(meshName, transform.size, colour.colour);
   default:
     return error("Renderer", "createGridMesh", "Invalid grid: " + grid.name + ", mesh: " + meshName);
   }
@@ -97,8 +97,17 @@ bool ResourceLoader::processPrimitives(SceneManager& sm) {
 
     const TransformComponent& transform = sm.getScene().getComponent<TransformComponent>(entity);
 
-    if (!createPrimitiveMesh(*primitive, transform))
-      return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive->name);
+    if (sm.getScene().hasComponent<ColourComponent>(entity)) {
+			const ColourComponent& colour = sm.getScene().getComponent<ColourComponent>(entity);
+      if (!createPrimitiveMesh(*primitive, transform, colour))
+        return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive->name);
+    } 
+    else {
+      const ColourComponent colour{};
+      if (!createPrimitiveMesh(*primitive, transform, colour))
+        return error("Engine", "loadScenePrimitives", "Failed to create mesh for primitive: " + primitive->name);
+		}
+			
 
     MeshGPU* primMesh;
     if (!meshManager.getMeshGPU(primitive->name, primMesh))
@@ -114,8 +123,6 @@ bool ResourceLoader::processPrimitives(SceneManager& sm) {
       model->textureNames[i].clear();
       model->textureMixRatio[i] = 0.0f;
     }
-    model->colour = primitive->colour;
-    model->colourMode = primitive->colourMode;
   }
 
   return true;
@@ -130,8 +137,16 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
 
     const TransformComponent& gridTransform = sceneManager.getScene().getComponent<TransformComponent>(entity);
 
-    if (!createGridMesh(*grid, gridTransform, sharedName))
-      return error("Engine", "loadSceneGrids", "Failed to create mesh for: " + sharedName);
+    if(sceneManager.getScene().hasComponent<ColourComponent>(entity)) {
+      const ColourComponent& colour = sceneManager.getScene().getComponent<ColourComponent>(entity);
+      if (!createGridMesh(*grid, sharedName, gridTransform, colour))
+        return error("Engine", "loadSceneGrids", "Failed to create mesh for: " + sharedName);
+    }
+    else {
+      const ColourComponent colour{};
+      if (!createGridMesh(*grid, sharedName, gridTransform, colour))
+        return error("Engine", "loadSceneGrids", "Failed to create mesh for: " + sharedName);
+		} 
 
     const int gridSide = (grid->count > 0) ? static_cast<int>(std::ceil(std::sqrt(static_cast<float>(grid->count)))) : 0;
     for (int i = 0; i < 0 + grid->count; ++i) {
@@ -166,8 +181,6 @@ bool ResourceLoader::processGrids(SceneManager& sceneManager) {
         model->textureNames[ti].clear();
         model->textureMixRatio[ti] = 0.0f;
       }
-      model->colour = grid->colour;
-      model->colourMode = grid->colourMode;
     }
   }
 
