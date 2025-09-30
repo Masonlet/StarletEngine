@@ -70,10 +70,6 @@ bool Engine::loadScene(const std::string& sceneIn) {
 		return error("Engine", "processGrids", "Failed to process grids for scene: " + sceneIn);
   debugLog("ResourceLoader", "processGrids", "Finish time: " + std::to_string(glfwGetTime()));
 
-  debugLog("ResourceLoader", "updateLightUniforms", "Start time: " + std::to_string(glfwGetTime()));
-  renderer.updateLightUniforms(sceneManager.getScene());
-  debugLog("ResourceLoader", "updateLightUniforms", "Finish time: " + std::to_string(glfwGetTime()));
-
   sceneManager.getScene().registerSystem(std::make_unique<CameraMoveSystem>());
   sceneManager.getScene().registerSystem(std::make_unique<CameraLookSystem>());
   sceneManager.getScene().registerSystem(std::make_unique<CameraFovSystem>());
