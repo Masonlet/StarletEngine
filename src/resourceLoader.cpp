@@ -1,13 +1,15 @@
 #include "StarletEngine/resourceLoader.hpp"
 
 #include "StarletScene/sceneManager.hpp"
-#include "StarletScene/components/transform.hpp"
 #include "StarletScene/components/model.hpp"
 #include "StarletScene/components/light.hpp"
 #include "StarletScene/components/camera.hpp"
 #include "StarletScene/components/grid.hpp"
 #include "StarletScene/components/textureData.hpp"
 #include "StarletScene/components/primitive.hpp"
+
+#include "StarletScene/components/transform.hpp"
+#include "StarletScene/components/colour.hpp"
 
 #include "StarletParser/utils/log.hpp"
 
