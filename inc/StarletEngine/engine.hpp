@@ -3,7 +3,7 @@
 #include "windowManager.hpp"
 #include "timer.hpp"
 #include "resourceLoader.hpp"
-#include "StarletGraphics/renderer.hpp"
+#include "StarletGraphics/renderer/renderer.hpp"
 #include "StarletScene/sceneManager.hpp"
 #include "StarletControls/inputManager.hpp"
 
