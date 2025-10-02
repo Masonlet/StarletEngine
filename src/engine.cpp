@@ -31,13 +31,11 @@ bool Engine::initialize(const unsigned int width, const unsigned int height, con
 	debugLog("ShaderManager", "createProgramFromPaths", "Finish time: " + std::to_string(glfwGetTime()));
 
   debugLog("Renderer", "initialize", "Start time: " + std::to_string(glfwGetTime()));
-  if (!renderer.initialize()) 
+  if (!renderer.init()) 
     return error("Engine", "initialize", "Failed to setup shaders for renderer");
   debugLog("Renderer", "initialize", "Finish time: " + std::to_string(glfwGetTime()));
 
-  return (renderer.getProgram() == 0)
-    ? error("Engine", "initialize", "No active shader program set after initializing")
-		: debugLog("Engine", "initialize", "Finish Time: " + std::to_string(glfwGetTime()));
+  return debugLog("Engine", "initialize", "Finish Time: " + std::to_string(glfwGetTime()));
 }
 
 bool Engine::loadScene(const std::string& sceneIn) {
