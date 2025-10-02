@@ -10,12 +10,11 @@
 
 #include <GLFW/glfw3.h>
 
-Engine::Engine() : renderer(meshManager, textureManager), resourceLoader(meshManager, textureManager) {}
+Engine::Engine() : renderer(resourceManager), resourceLoader(resourceManager) {}
 
 void Engine::setAssetPaths(const std::string& path) {
   glState.setBasePath((path + "/shaders/").c_str());
-  meshManager.setBasePath((path + "/models/").c_str());
-  textureManager.setBasePath((path + "/textures/").c_str());
+  resourceLoader.setBasePath(path);
   sceneManager.setBasePath((path + "/scenes/").c_str());
 }
 
@@ -23,7 +22,7 @@ bool Engine::initialize(const unsigned int width, const unsigned int height, con
   debugLog("Engine", "initialize", "Start time: " + std::to_string(glfwGetTime()));
 
   if (!windowManager.createWindow(width, height, title)) 
-    return error("Engine", "initialize", "Failed to intialize window");
+    return error("Engine", "initialize", "Failed to initialize window");
 
   if (!glState.init()) 
     error("Engine", "initialize", "Failed to initialize GL state");
@@ -65,6 +64,11 @@ bool Engine::loadScene(const std::string& sceneIn) {
 		return error("Engine", "processGrids", "Failed to process grids for scene: " + sceneIn);
   debugLog("ResourceLoader", "processGrids", "Finish time: " + std::to_string(glfwGetTime()));
 
+  debugLog("ResourceLoader", "processTextureConnection", "Start time: " + std::to_string(glfwGetTime()));
+  if (!resourceLoader.processTextureConnections(sceneManager.getScene()))
+    return error("Engine", "processTextureConnection", "Failed to connect texture handles for scene: " + sceneIn);
+  debugLog("ResourceLoader", "processTextureConnection", "Finish time: " + std::to_string(glfwGetTime()));
+
   sceneManager.getScene().registerSystem(std::make_unique<CameraMoveSystem>());
   sceneManager.getScene().registerSystem(std::make_unique<CameraLookSystem>());
   sceneManager.getScene().registerSystem(std::make_unique<CameraFovSystem>());
@@ -94,7 +98,7 @@ void Engine::run() {
 }
 
 void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
-  for (const KeyEvent event : keyEvents) {
+  for (const KeyEvent& event : keyEvents) {
     if (event.action != GLFW_PRESS) continue;
 
     switch (event.key) {
@@ -109,7 +113,7 @@ void Engine::handleKeyEvents(const std::vector<KeyEvent>& keyEvents) {
 }
 
 void Engine::handleButtonEvents(const std::vector<MouseButtonEvent>& buttonEvents) {
-  for (const MouseButtonEvent event : buttonEvents) {
+  for (const MouseButtonEvent& event : buttonEvents) {
     std::string buttonName;
     switch (event.button) {
     case GLFW_MOUSE_BUTTON_LEFT:   buttonName = "Left"; break;
