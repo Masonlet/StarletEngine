@@ -1,8 +1,8 @@
 #pragma once
 
-#include "StarletGraphics/shader/shaderManager.hpp"
-#include "StarletGraphics/mesh/meshManager.hpp"
-#include "StarletGraphics/texture/textureManager.hpp"
+#include "StarletGraphics/manager/shaderManager.hpp"
+#include "StarletGraphics/manager/meshManager.hpp"
+#include "StarletGraphics/manager/textureManager.hpp"
 
 struct Primitive;
 struct Model;
