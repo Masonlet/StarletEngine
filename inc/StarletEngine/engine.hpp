@@ -25,18 +25,18 @@ public:
 	void onButton(const MouseButtonEvent& event) { inputManager.onButton(event); }
 
 	void toggleCursorLock() { inputManager.setCursorLocked(windowManager.switchCursorLock()); }
-	void toggleWireframe() { renderer.toggleWireframe(); };
+	void toggleWireframe() { glState.toggleWireframe(); };
 
 private:
 	WindowManager windowManager;
 	Timer timer;
 	InputManager inputManager;
 
-	ShaderManager shaderManager;
+	GLStateManager glState;
 	MeshManager meshManager;
 	TextureManager textureManager;
-
 	Renderer renderer;
+
 	ResourceLoader resourceLoader;
 	SceneManager sceneManager;
 

@@ -10,10 +10,10 @@
 
 #include <GLFW/glfw3.h>
 
-Engine::Engine() : renderer(shaderManager, meshManager, textureManager), resourceLoader(meshManager, textureManager) {}
+Engine::Engine() : renderer(meshManager, textureManager), resourceLoader(meshManager, textureManager) {}
 
 void Engine::setAssetPaths(const std::string& path) {
-  shaderManager.setBasePath((path + "/shaders/").c_str());
+  glState.setBasePath((path + "/shaders/").c_str());
   meshManager.setBasePath((path + "/models/").c_str());
   textureManager.setBasePath((path + "/textures/").c_str());
   sceneManager.setBasePath((path + "/scenes/").c_str());
@@ -22,19 +22,16 @@ void Engine::setAssetPaths(const std::string& path) {
 bool Engine::initialize(const unsigned int width, const unsigned int height, const char* title) {
   debugLog("Engine", "initialize", "Start time: " + std::to_string(glfwGetTime()));
 
-  if (!windowManager.createWindow(width, height, title)) return false;
-  windowManager.setWindowPointer(this);
+  if (!windowManager.createWindow(width, height, title)) 
+    return error("Engine", "initialize", "Failed to intialize window");
 
-	debugLog("ShaderManager", "createProgramFromPaths", "Start time: " + std::to_string(glfwGetTime()));
-  if (!shaderManager.createProgramFromPaths("shader1", "vertex_shader.glsl", "fragment_shader.glsl"))
-    return error("Engine", "initialize", "Failed to create shader program from file");
-	debugLog("ShaderManager", "createProgramFromPaths", "Finish time: " + std::to_string(glfwGetTime()));
+  if (!glState.init()) 
+    error("Engine", "initialize", "Failed to initialize GL state");
 
-  debugLog("Renderer", "initialize", "Start time: " + std::to_string(glfwGetTime()));
-  if (!renderer.init()) 
+  if (!renderer.init(glState.getProgram())) 
     return error("Engine", "initialize", "Failed to setup shaders for renderer");
-  debugLog("Renderer", "initialize", "Finish time: " + std::to_string(glfwGetTime()));
 
+  windowManager.setWindowPointer(this);
   return debugLog("Engine", "initialize", "Finish Time: " + std::to_string(glfwGetTime()));
 }
 
@@ -90,7 +87,7 @@ void Engine::run() {
     handleButtonEvents(inputManager.consumeButtonEvents());
 
     sceneManager.getScene().updateSystems(inputManager, deltaTime);
-    renderer.renderFrame(sceneManager.getScene(), windowManager.getAspect());
+    renderer.renderFrame(glState.getProgram(), sceneManager.getScene(), windowManager.getAspect());
 
     windowManager.swapBuffers();
   }
