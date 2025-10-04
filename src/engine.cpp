@@ -14,7 +14,7 @@ Engine::Engine() : renderer(resourceManager), resourceLoader(resourceManager) {}
 
 void Engine::setAssetPaths(const std::string& path) {
   glState.setBasePath((path + "/shaders/").c_str());
-  resourceLoader.setBasePath(path);
+  resourceManager.setBasePath(path);
   sceneManager.setBasePath((path + "/scenes/").c_str());
 }
 
