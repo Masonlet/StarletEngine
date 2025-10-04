@@ -1,5 +1,5 @@
 #include "StarletEngine/windowManager.hpp"
-#include "StarletParser/utils/log.hpp"
+#include "StarletSerializer/utils/log.hpp"
 
 #include "StarletEngine/callbacks.hpp"
 
